@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 
+      基础主题。通过 AppCompatDelegate.setDefaultNightMode 切换深色模式。
+      浅色/深色配色由 values(-night)/colors.xml 控制。
+    -->
+    <style name="Theme.Ledger" parent="Theme.AppCompat.DayNight.NoActionBar" />
+
+    <!-- 删除确认弹窗：保持蓝紫调圆角风格 -->
+    <style name="Theme.Ledger.Dialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:alertDialogTheme">@style/Theme.Ledger.Dialog.Alert</item>
+    </style>
+
+    <style name="Theme.Ledger.Dialog.Alert" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:buttonBarStyle">@style/Theme.Ledger.Dialog.ButtonBar</item>
+    </style>
+
+    <style name="Theme.Ledger.Dialog.ButtonBar" parent="Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+</resources>

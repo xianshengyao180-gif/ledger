@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">极简记账</string>
+    <string name="no_bills">还没有记录\n付款后会自动出现\n（点这里可看收到的原始通知）</string>
+    <string name="open_listener">通知使用权</string>
+    <string name="accessibility_service_desc">监听微信聊天界面，自动记录转账/红包入账</string>
+    <string name="open_battery">电池优化</string>
+    <string name="raw_noti">原始通知</string>
+    <string name="pie">用途占比</string>
+    <string name="open_autostart">自启动设置</string>
+
+    <string name="budget_not_set">点此设置月度预算 ›</string>
+    <string name="budget_amount_label">月度预算（元）</string>
+    <string name="budget_amount_hint">例如 2000</string>
+    <string name="budget_threshold_label">预警阈值（%）</string>
+    <string name="budget_threshold_hint">例如 80</string>
+    <string name="budget_threshold_note">花到预算的这个比例时提醒一次；填 0 则只在超支时提醒</string>
+
+    <string name="pick_category">这笔钱用在哪？</string>
+    <string name="skip_category">暂不选择</string>
+    <string name="clear_category">清除用途</string>
+    <string name="tab_expense">支出</string>
+    <string name="tab_income">收入</string>
+    <string name="pie_no_data">本月还没有数据</string>
+    <string name="uncategorized_banner">有 %1$d 笔还没选用途，点此补上 ›</string>
+
+    <string name="transfer_title">检测到一笔转账</string>
+    <string name="transfer_note">微信只在聊天里更新状态，通知里不带金额。请核对后填写。\n\n没收到或已退回的，直接选「忽略这笔」。</string>
+    <string name="transfer_amount_label">转账金额（元）</string>
+    <string name="transfer_amount_hint">例如 100</string>
+    <string name="transfer_as_expense">我转出的</string>
+    <string name="transfer_as_income">我收到的</string>
+    <string name="transfer_confirm">确认记账</string>
+    <string name="transfer_ignore">忽略这笔</string>
+    <string name="pending_banner">有 %1$d 笔转账待确认，点此处理 ›</string>
+
+    <string name="dark_mode">深色</string>
+    <string name="light_mode">浅色</string>
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  微信转账/红包自动记账的无障碍服务配置。
+
+  监听范围：
+    - 仅 com.tencent.mm（微信）
+    - 窗口内容变化（聊天界面更新时触发）
+    - 视图文本变化（TextView 内容更新时触发）
+
+  不需要用户反馈或手势交互。
+-->
+<accessibility-service
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeWindowContentChanged|typeViewTextChanged|typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagReportViewIds|flagRetrieveInteractiveWindows|flagIncludeNotImportantViews"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/accessibility_service_desc"
+    android:notificationTimeout="2000" />

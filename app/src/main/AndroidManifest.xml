@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 常驻前台服务所需的权限 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!-- Android 13+ 展示常驻通知需要 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- 定向申请「电池优化白名单」需要。
+         没有这个权限时，系统的申请页会立刻自己关掉——而且不抛异常，
+         所以代码里的 try/catch 兜底完全等不到（实测踩过）。 -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <!-- 开机自启，让重启后不必手动打开应用 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- 提醒横幅只飘几秒，容易错过；配一段短振动让它能被注意到。
+         缺这条权限时振动是空操作（不报错、也不振动），所以要显式声明。 -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- 读取银行到账/扣款短信，补足通知监听收不到的部分 -->
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <!-- 接收 SMS_DELIVERED 广播（Android 4.4+ 需要是默认短信 App 才有，
+         这里只是声明，不强求，降级为 ContentObserver 方案） -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Ledger">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 从通知点进来选用途。excludeFromRecents：选完就关，不该占一个「最近任务」 -->
+        <activity
+            android:name=".CategorizeActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
+        <activity
+            android:name=".PieActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <!-- 转账「已被接收」的确认页。从提醒点进来，也可从主界面横幅进 -->
+        <activity
+            android:name=".TransferActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleTop" />
+
+        <!-- 微信转账/红包自动记账 · 无障碍服务。
+             在 ColorOS / 新版微信收不到通知的场景下，
+             监听微信界面变化自动记账。 -->
+        <service
+            android:name=".WeChatAccessibilityService"
+            android:exported="false"
+            android:label="微信转账/红包自动记账"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+        <!-- 核心：通知监听服务。用户在系统设置里授权后，系统会把通知投递给它 -->
+        <service
+            android:name=".NotiListener"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- 常驻前台服务：保证进程活着，否则 ColorOS 会拒绝绑定上面的监听服务 -->
+        <service
+            android:name=".KeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="保持通知监听服务存活以自动记账" />
+        </service>
+
+        <!-- CSV / xlsx 账单导入页 -->
+        <activity
+            android:name=".UncategorizedBulkActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".BudgetActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ImportActivity"
+            android:exported="true"
+            android:parentActivityName=".MainActivity">
+            <!-- 文件管理器长按 xlsx → 用其他应用打开 → 极简记账 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/csv" />
+                <data android:mimeType="text/comma-separated-values" />
+            </intent-filter>
+            <!-- 文件管理器长按 xlsx/csv → 分享 → 极简记账 -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/csv" />
+                <data android:mimeType="text/comma-separated-values" />
+            </intent-filter>
+        </activity>
+
+        <!-- 开机/更新后自动拉起常驻服务 -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

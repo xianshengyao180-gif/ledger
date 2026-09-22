@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">@color/bg_dark</color>
+    <color name="card">@color/card_dark</color>
+    <color name="text_primary">@color/text_primary_dark</color>
+    <color name="text_secondary">@color/text_secondary_dark</color>
+    <color name="text_tertiary">@color/text_tertiary_dark</color>
+    <color name="accent">@color/accent_dark</color>
+    <color name="accent_soft">@color/accent_soft_dark</color>
+    <color name="income">@color/income_dark</color>
+    <color name="expense">@color/expense_dark</color>
+    <color name="divider">@color/divider_dark</color>
+    <color name="warn">@color/warn_dark</color>
+    <color name="dot_off">@color/dot_off_dark</color>
+    <color name="banner_bg">@color/banner_bg_dark</color>
+    <color name="multi_bar_bg">@color/multi_bar_bg_dark</color>
+    <color name="transparent_light">@color/transparent_dark</color>
+</resources>

@@ -1,0 +1,44 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.lele.ledger'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.lele.ledger"
+        minSdk 26
+        targetSdk 34
+        // v17: 修待确认转账入库后界面不实时刷新（notifyUi 被早退跳过）
+        versionCode 21
+        versionName "2.1.5"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // 用 debug 签名，方便直接侧载安装。要上架/长期用请换成自己的密钥。
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // 统一 Kotlin 版本。appcompat 会间接带入 kotlin-stdlib-jdk7/jdk8@1.6.21，
+    // 而 Kotlin 1.8 起这些类已合并进主 stdlib，不同版本并存会导致
+    // "Duplicate class kotlin.collections.jdk8..." 编译失败。BOM 把它们对齐到同一版本。
+    implementation(platform('org.jetbrains.kotlin:kotlin-bom:1.8.22'))
+
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    // Apache POI：解析微信导出的 xlsx 账单
+    implementation 'org.apache.poi:poi:5.2.5'
+    implementation 'org.apache.poi:poi-ooxml:5.2.5'
+}

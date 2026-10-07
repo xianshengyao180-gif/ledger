@@ -156,9 +156,12 @@ public final class BillParser {
         if (transferDone) {
             ArrayList<Double> known = extractAmounts(safeText);
             if (known.isEmpty()) {
-                // 没金额：是我发出去被对方收了，放待确认
+                // 没金额：是我发出去被对方收了，放待确认。
+                // 金额传 0.0（不是 -0.0）：这里根本没有「已知金额」，符号无意义。
+                // -0.0 虽然与 0 数值相等、显示也一样，但会让「amount<0 才预填」这类
+                // 判断和测试期望（+0.00）对不上，读代码时像个 bug。用 +0 更诚实。
                 String who = safeTitle.trim();
-                return Bill.pendingTransfer(-0.0, channelOf(pkg),
+                return Bill.pendingTransfer(0.0, channelOf(pkg),
                         who.isEmpty() ? "转账" : who, System.currentTimeMillis());
             }
             // 有金额：别人转给我/发给我的红包，记收入

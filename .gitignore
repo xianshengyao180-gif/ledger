@@ -1,0 +1,12 @@
+# Gradle 构建产物：可重建，不该进版本库
+.gradle/
+build/
+app/build/
+
+# 本地配置（SDK 路径因机器而异）
+local.properties
+
+# IDE
+.idea/
+*.iml
+.DS_Store

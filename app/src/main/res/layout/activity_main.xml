@@ -527,7 +527,27 @@
 
     </LinearLayout>
 
+    <!-- 手动记一笔：悬浮按钮。自动记账漏掉/现金/线下时用它补一笔 -->
+    <TextView
+        android:id="@+id/btnAdd"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="end|bottom"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_fab"
+        android:clickable="true"
+        android:elevation="8dp"
+        android:focusable="true"
+        android:gravity="center"
+        android:text="＋"
+        android:textColor="#FFFFFFFF"
+        android:textSize="28sp" />
+
     <!-- 编辑账单浮动卡片（覆盖全屏） -->
     <include layout="@layout/activity_bill_edit" />
+
+    <!-- 手动记账浮动卡片（覆盖全屏） -->
+    <include layout="@layout/activity_add_bill" />
 
 </FrameLayout>

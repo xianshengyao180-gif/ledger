@@ -88,6 +88,16 @@ public class MainActivity extends AppCompatActivity {
     private Bill editingBill;
     private String editingCategoryBefore;
 
+    /** 手动记账浮动卡片 */
+    private View addOverlay;
+    private android.widget.EditText etAddAmount;
+    private TextView tvAddCategory;
+    private TextView tvAddSign;
+    private View btnAddExpense;
+    private View btnAddIncome;
+    /** 手动记账当前方向：true=收入。默认支出——绝大多数手动补记都是花钱。 */
+    private boolean addIsIncome = false;
+
 
     private boolean receiverRegistered = false;
 
@@ -214,6 +224,25 @@ public class MainActivity extends AppCompatActivity {
                 showCategoryPicker();
             }
         });
+
+        // 手动记一笔浮动卡片
+        addOverlay = findViewById(R.id.addOverlay);
+        etAddAmount = findViewById(R.id.etAddAmount);
+        tvAddCategory = findViewById(R.id.tvAddCategory);
+        tvAddSign = findViewById(R.id.tvAddSign);
+        btnAddExpense = findViewById(R.id.btnAddExpense);
+        btnAddIncome = findViewById(R.id.btnAddIncome);
+        addOverlay.setOnClickListener(v -> hideAddCard());
+        addOverlay.findViewById(R.id.addCard).setOnClickListener(null);
+        addOverlay.findViewById(R.id.btnAddClose).setOnClickListener(v -> hideAddCard());
+        addOverlay.findViewById(R.id.btnAddCancel).setOnClickListener(v -> hideAddCard());
+        addOverlay.findViewById(R.id.btnAddSave).setOnClickListener(v -> saveAddedBill());
+        // 方向切换：影响金额前缀颜色，也决定用途词表（支出 12 类 / 收入 8 类）
+        btnAddExpense.setOnClickListener(v -> setAddDirection(false));
+        btnAddIncome.setOnClickListener(v -> setAddDirection(true));
+        addOverlay.findViewById(R.id.btnAddCategory).setOnClickListener(v -> showAddCategoryPicker());
+        // 悬浮按钮：入口只有一个，不再往抽屉里塞
+        findViewById(R.id.btnAdd).setOnClickListener(v -> showAddCard());
 
         // 删除确认浮动卡片（动态 inflate 的覆盖层，全屏覆盖）
         ViewGroup decorView = (ViewGroup) getWindow().getDecorView();
@@ -399,7 +428,7 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    /** 点某条记录 → 弹出编辑卡片修改金额/用途/备注。 */
+    /** 点某条记录 → 弹出编辑卡片修改金额/用途。 */
     private void openCategorize(Bill b) {
         showBillEditor(b);
     }
@@ -497,6 +526,173 @@ public class MainActivity extends AppCompatActivity {
                 getResources().getDisplayMetrics());
     }
 
+    // ---------------- 手动记一笔 ----------------
+
+    /** 打开「记一笔」卡片。每次都重置成干净的空白状态，避免带出上一次的输入。 */
+    private void showAddCard() {
+        if (adapter.isMultiSelectMode()) {
+            exitMultiSelect();
+        }
+        addIsIncome = false;
+        etAddAmount.setText("");
+        tvAddCategory.setText(R.string.add_category_none);
+        tvAddCategory.setTag(null);
+        addOverlay.findViewById(R.id.addCategoryGrid).setVisibility(View.GONE);
+        applyAddDirection();
+
+        addOverlay.setVisibility(View.VISIBLE);
+        // 必须把悬浮按钮藏掉。真机实测（一加 Ace 3，1080x2376）：
+        // FAB 在 [852,2088]-[1020,2256]，正好压住卡片里「保存」按钮
+        // [756,2085]-[972,2196] 的右半边，且 FAB 的绘制层级更高，
+        // 于是每一次点「保存」都被 FAB 吃掉——表现为按了没反应、账记不上。
+        // 同排的「取消」（x 到 726 为止）不重叠，所以它一直正常，
+        // 这恰恰是最容易把人带偏的地方：一半按钮好用，一半"坏了"。
+        findViewById(R.id.btnAdd).setVisibility(View.GONE);
+        addOverlay.setAlpha(0f);
+        addOverlay.findViewById(R.id.addCard).setTranslationY(100f);
+        addOverlay.animate().alpha(1f).setDuration(200).start();
+        addOverlay.findViewById(R.id.addCard).animate().translationY(0f).setDuration(200).start();
+
+        // 刻意「不」自动聚焦金额框。
+        //
+        // 一开始写了 requestFocus()，结果在真机上（一加 Ace 3 / 1080x2376）键盘一弹出就把
+        // 卡片下半截盖住：用途行和保存按钮全被挡住，点不到，看着像功能坏了。
+        // 编辑卡片从来没这个问题，就因为它不抢焦点。
+        // 用户要输金额会自己点一下，代价远小于按钮被键盘埋掉。
+        // 卡片本身够高（约 1584px），键盘弹出后仍留足空间给用途网格。
+    }
+
+    private void hideAddCard() {
+        addOverlay.setVisibility(View.GONE);
+        // 卡片收起，把悬浮按钮放回来（见 showAddCard 里的说明）
+        findViewById(R.id.btnAdd).setVisibility(View.VISIBLE);
+        // 收起键盘，否则关了卡片输入法还杵在那儿
+        android.view.inputmethod.InputMethodManager imm =
+                (android.view.inputmethod.InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(etAddAmount.getWindowToken(), 0);
+        }
+    }
+
+    /**
+     * 切换收支方向。
+     *
+     * 换方向时必须把已选的用途清掉：支出和收入是两套词表，
+     * 「餐饮」在收入里根本不存在，留着会变成一个选不中也存不进去的幽灵值。
+     */
+    private void setAddDirection(boolean income) {
+        if (addIsIncome != income) {
+            tvAddCategory.setText(R.string.add_category_none);
+            tvAddCategory.setTag(null);
+            addOverlay.findViewById(R.id.addCategoryGrid).setVisibility(View.GONE);
+        }
+        addIsIncome = income;
+        applyAddDirection();
+    }
+
+    /** 方向切换后的视觉状态：金额前缀 + 两个胶囊的选中态。 */
+    private void applyAddDirection() {
+        tvAddSign.setText(addIsIncome ? "+¥" : "-¥");
+        tvAddSign.setTextColor(getColorCompat(addIsIncome ? R.color.income : R.color.expense));
+
+        btnAddExpense.setBackgroundResource(addIsIncome ? R.drawable.bg_pill : R.drawable.bg_pill_sel);
+        btnAddExpense.setAlpha(addIsIncome ? 0.6f : 1f);
+        ((TextView) btnAddExpense).setTextColor(getColorCompat(addIsIncome ? R.color.text_secondary : R.color.accent));
+        ((TextView) btnAddExpense).setTypeface(null, addIsIncome
+                ? android.graphics.Typeface.NORMAL : android.graphics.Typeface.BOLD);
+
+        btnAddIncome.setBackgroundResource(addIsIncome ? R.drawable.bg_pill_sel : R.drawable.bg_pill);
+        btnAddIncome.setAlpha(addIsIncome ? 1f : 0.6f);
+        ((TextView) btnAddIncome).setTextColor(getColorCompat(addIsIncome ? R.color.accent : R.color.text_secondary));
+        ((TextView) btnAddIncome).setTypeface(null, addIsIncome
+                ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+    }
+
+    private int getColorCompat(int resId) {
+        return ContextCompat.getColor(this, resId);
+    }
+
+    /** 展开用途 Grid。词表随当前方向切换。 */
+    private void showAddCategoryPicker() {
+        final ViewGroup pickerBox = addOverlay.findViewById(R.id.addCategoryGrid);
+        if (pickerBox.getVisibility() == View.VISIBLE) {
+            pickerBox.animate().alpha(0f).setDuration(150).withEndAction(() ->
+                    pickerBox.setVisibility(View.GONE)).start();
+            return;
+        }
+        pickerBox.removeAllViews();
+        pickerBox.setAlpha(0f);
+        pickerBox.setVisibility(View.VISIBLE);
+
+        LinearLayout grid = new LinearLayout(this);
+        grid.setOrientation(LinearLayout.VERTICAL);
+        grid.setPadding(0, dp(12), 0, 0);
+        // 传 ±1 只是为了让 Category.forAmount 挑对词表，与真实金额无关
+        String current = (String) tvAddCategory.getTag();
+        CategoryChips.fill(this, grid, addIsIncome ? 1 : -1, current, name -> {
+            tvAddCategory.setText(name);
+            tvAddCategory.setTag(name);
+            pickerBox.animate().alpha(0f).setDuration(150).withEndAction(() ->
+                    pickerBox.setVisibility(View.GONE)).start();
+        });
+        pickerBox.addView(grid);
+        pickerBox.animate().alpha(1f).setDuration(200).start();
+    }
+
+    /**
+     * 保存手动记的这一笔。
+     *
+     * 与自动记账走同一张 bills 表、同一套金额符号约定（正=收入、负=支出），
+     * 所以汇总、饼图、预算全都能直接用，不需要为新来源加任何分支。
+     */
+    private void saveAddedBill() {
+        String amountStr = etAddAmount.getText().toString().trim();
+        if (amountStr.isEmpty()) {
+            Toast.makeText(this, R.string.add_no_amount, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        double amount;
+        try {
+            amount = Double.parseDouble(amountStr);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, R.string.add_bad_amount, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (amount <= 0) {
+            Toast.makeText(this, R.string.add_zero_amount, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        double signed = addIsIncome ? amount : -amount;
+        String cat = (String) tvAddCategory.getTag();
+        if (cat == null) {
+            cat = "";
+        }
+
+        // nkey 留空：手动记录没有通知标识，也不需要去重——
+        // 用户连点两次保存，那就是他真想记两笔，拦下来反而更坏。
+        long now = System.currentTimeMillis();
+        long id = db.insert(signed, "手动", getString(R.string.add_bill), now, null);
+        if (id <= 0) {
+            Toast.makeText(this, "保存失败，请重试", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        db.updateCategory(id, cat);
+
+        // 与自动记账同样的后续动作：预算预警 + 刷新待分类提醒
+        if (signed < 0) {
+            Budget.checkAndAlert(this, db.monthTotals(Budget.monthStart())[1]);
+        }
+        if (!cat.isEmpty()) {
+            Budget.checkTagAndAlert(this, db, cat);
+        }
+        BillNotify.refresh(this, db);
+
+        hideAddCard();
+        refresh();
+        Toast.makeText(this, R.string.add_saved, Toast.LENGTH_SHORT).show();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -590,6 +786,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        // 卡片开着时，返回键先收卡片——直接退出应用会让人以为刚填的东西丢了
+        if (addOverlay != null && addOverlay.getVisibility() == View.VISIBLE) {
+            hideAddCard();
+            return;
+        }
+        if (editOverlay != null && editOverlay.getVisibility() == View.VISIBLE) {
+            hideBillEditor();
+            return;
+        }
         if (adapter.isMultiSelectMode()) {
             exitMultiSelect();
             return;

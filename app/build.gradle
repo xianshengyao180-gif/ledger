@@ -11,8 +11,9 @@ android {
         minSdk 26
         targetSdk 34
         // v17: 修待确认转账入库后界面不实时刷新（notifyUi 被早退跳过）
-        versionCode 21
-        versionName "2.1.5"
+        // v18: 新增「记一笔」手动记账入口
+        versionCode 22
+        versionName "2.2.0"
     }
 
     buildTypes {

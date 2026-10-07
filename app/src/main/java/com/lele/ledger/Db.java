@@ -362,14 +362,6 @@ public final class Db extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)});
     }
 
-    /** 更新备注。 */
-    public int updateNote(long id, String note) {
-        ContentValues v = new ContentValues();
-        v.put("note", note == null ? "" : note);
-        return getWritableDatabase().update("bills", v, "id=?",
-                new String[]{String.valueOf(id)});
-    }
-
     /** 还有多少笔没定用途。 */
     public int countUncategorized() {
         Cursor c = getReadableDatabase().rawQuery(

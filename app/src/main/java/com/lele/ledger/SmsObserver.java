@@ -152,7 +152,7 @@ public class SmsObserver {
                 return;
             }
 
-            Log.i(TAG, "发现银行短信 from=" + address + " body=" + body);
+            Log.i(TAG, "发现银行短信");
 
             // 用已有的 BillParser 解析
             Bill bill = BillParser.parse("", "短信", body);
@@ -173,7 +173,7 @@ public class SmsObserver {
 
                 long newId = db.insert(bill.amount, bill.channel, bill.title, date, nkey);
                 if (newId > 0) {
-                    Log.i(TAG, "短信已记账 #" + newId + " " + bill.amount + " " + bill.title);
+                    Log.i(TAG, "短信记账成功");
                     notifyUi();
                 }
             } finally {

@@ -29,10 +29,10 @@ public final class Category {
      * 否则一笔新的餐饮进来，整个饼图的颜色就全变了。
      */
     private static final int[] PALETTE = {
-            0xFF4E6AF0, 0xFF07C160, 0xFFFF8A3D, 0xFFE5484D,
-            0xFF9B5CF6, 0xFF16B8C8, 0xFFFFB020, 0xFFEC4899,
-            0xFF64748B, 0xFF22C55E, 0xFF6366F1, 0xFFF59E0B,
-            0xFF14B8A6, 0xFFEF4444, 0xFF8B5CF6, 0xFF0EA5E9
+            0xFF59653C, 0xFF8F9D78, 0xFFAE9871, 0xFF9B7258,
+            0xFF6E8270, 0xFFB8AE91, 0xFF788E91, 0xFFA58A85,
+            0xFF84996B, 0xFF7E8570, 0xFFC3AA78, 0xFF9C9F8B,
+            0xFF748861, 0xFFAB9167, 0xFF6B7D77, 0xFFB4A287
     };
 
     private Category() {

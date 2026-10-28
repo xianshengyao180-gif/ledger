@@ -22,7 +22,7 @@ public final class CategoryChips {
         void onPick(String name);
     }
 
-    private static final int PER_ROW = 3;
+    private static final int PER_ROW = 4;
 
     private CategoryChips() {
     }
@@ -70,19 +70,28 @@ public final class CategoryChips {
 
     private static TextView chip(Context ctx, final String name, boolean selected, final OnPick cb) {
         TextView tv = new TextView(ctx);
-        tv.setText(selected ? name + " ✓" : name);
-        tv.setTextColor(Color.WHITE);
-        tv.setTextSize(14);
+        tv.setText(name);
+        tv.setSelected(selected);
+        tv.setTextColor(ctx.getColor(selected ? R.color.accent : R.color.text_secondary));
+        tv.setTextSize(12);
         tv.setGravity(Gravity.CENTER);
-        tv.setPadding(0, dp(ctx, 11), 0, dp(ctx, 11));
+        tv.setPadding(0, dp(ctx, 9), 0, dp(ctx, 9));
+        tv.setMinHeight(dp(ctx, 68));
+        android.graphics.drawable.Drawable symbol = androidx.appcompat.content.res.AppCompatResources
+                .getDrawable(ctx, LedgerIcons.forCategory(name)).mutate();
+        symbol.setTint(ctx.getColor(selected ? R.color.accent : R.color.text_secondary));
+        symbol.setBounds(0, 0, dp(ctx, 20), dp(ctx, 20));
+        tv.setCompoundDrawables(null, symbol, null, null);
+        tv.setCompoundDrawablePadding(dp(ctx, 6));
+        tv.setFocusable(true);
 
         GradientDrawable bg = new GradientDrawable();
         bg.setShape(GradientDrawable.RECTANGLE);
         bg.setCornerRadius(dp(ctx, 14));
-        bg.setColor(Category.colorOf(name));
+        bg.setColor(ctx.getColor(selected ? R.color.accent_soft : R.color.bg));
         if (selected) {
             // 加一圈白描边：同色系里光靠文字很难一眼看出选中的是哪个
-            bg.setStroke(dp(ctx, 2), 0xFFFFFFFF);
+            bg.setStroke(dp(ctx, 1), ctx.getColor(R.color.accent));
         }
         tv.setBackground(bg);
 

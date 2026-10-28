@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
     android:focusableInTouchMode="false"
     android:descendantFocusability="beforeDescendants">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,116 +15,119 @@
         android:paddingEnd="14dp"
         android:paddingTop="14dp"
         android:paddingBottom="14dp">
-
-        <!-- 总预算概要卡片 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+            <ImageButton
+                style="@style/Ledger.IconButton"
+                android:id="@+id/btnBack"
+                android:src="@drawable/ic_chevron_left"
+                android:contentDescription="@string/back" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/budget_title"
+                android:textColor="@color/text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </LinearLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_hero"
             android:orientation="vertical"
             android:padding="18dp">
-
             <TextView
                 android:id="@+id/tvTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#CCFFFFFF"
+                android:textColor="@color/hero_text"
                 android:textSize="12sp" />
-
             <TextView
                 android:id="@+id/tvAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:includeFontPadding="false"
-                android:textColor="#FFFFFFFF"
+                android:textColor="@color/hero_text"
                 android:textSize="32sp"
-                android:textStyle="bold" />
-
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="18sp"
+                android:autoSizeMaxTextSize="32sp"
+                android:autoSizeStepGranularity="1sp" />
             <TextView
                 android:id="@+id/tvSub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:alpha="0.85"
-                android:textColor="#FFFFFFFF"
+                android:textColor="@color/hero_text"
                 android:textSize="12sp" />
         </LinearLayout>
-
-        <!-- 总预算输入 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:alpha="0.7"
             android:text="总预算（元）"
             android:textSize="13sp" />
-
         <EditText
             android:id="@+id/etBudget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:background="@drawable/bg_hero"
+            android:background="@drawable/bg_card"
             android:gravity="center_vertical"
             android:hint="例如 3000"
             android:inputType="numberDecimal"
             android:padding="14dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="#66FFFFFF"
-            android:textSize="20sp" />
-
-        <!-- 预警阈值 -->
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_tertiary"
+            android:textSize="20sp"
+            android:minHeight="52dp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:alpha="0.7"
             android:text="预警阈值（%）"
             android:textSize="13sp" />
-
         <EditText
             android:id="@+id/etThreshold"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:background="@drawable/bg_hero"
+            android:background="@drawable/bg_card"
             android:gravity="center_vertical"
             android:hint="例如 80"
             android:inputType="number"
             android:padding="14dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="#66FFFFFF"
-            android:textSize="20sp" />
-
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_tertiary"
+            android:textSize="20sp"
+            android:minHeight="52dp" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:alpha="0.5"
             android:text="花到总预算的这个比例时提醒；填 0 则只在超支时提醒"
-            android:textColor="@android:color/white"
+            android:textColor="@color/text_primary"
             android:textSize="11sp" />
-
-        <!-- 分类预算列表标题 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:alpha="0.7"
             android:text="分类预算"
             android:textSize="13sp" />
-
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:alpha="0.4"
             android:text="每个分类设单独的月度额度，超出时单独提醒"
-            android:textColor="@android:color/white"
+            android:textColor="@color/text_primary"
             android:textSize="11sp" />
-
-        <!-- 分类列表容器（LinearLayout，手动 addView） -->
         <LinearLayout
             android:id="@+id/tagList"
             android:layout_width="match_parent"
@@ -133,8 +136,6 @@
             android:focusable="false"
             android:focusableInTouchMode="false"
             android:orientation="vertical" />
-
-        <!-- 添加标签按钮 -->
         <LinearLayout
             android:id="@+id/btnAddTag"
             android:layout_width="match_parent"
@@ -145,8 +146,8 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="horizontal"
-            android:padding="12dp">
-
+            android:padding="12dp"
+            android:minHeight="50dp">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -154,14 +155,11 @@
                 android:textColor="@color/income"
                 android:textSize="14sp" />
         </LinearLayout>
-
-        <!-- 底部按钮 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:orientation="horizontal">
-
             <TextView
                 android:id="@+id/btnClear"
                 android:layout_width="0dp"
@@ -172,23 +170,28 @@
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp"
                 android:text="关闭预算"
-                android:textColor="@color/expense"
+                android:textColor="@color/destructive"
                 android:textSize="14sp"
-                android:visibility="gone" />
-
+                android:visibility="gone"
+                android:minHeight="50dp"
+                android:clickable="true"
+                android:focusable="true" />
             <TextView
                 android:id="@+id/btnSave"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/bg_pill"
+                android:background="@drawable/bg_primary_button"
                 android:gravity="center"
                 android:paddingTop="12dp"
                 android:paddingBottom="12dp"
                 android:text="保存"
-                android:textColor="@color/text_primary"
-                android:textSize="14sp" />
+                android:textColor="@color/button_text"
+                android:textSize="14sp"
+                android:minHeight="50dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_marginStart="8dp" />
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

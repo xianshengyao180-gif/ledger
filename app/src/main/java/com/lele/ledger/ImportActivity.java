@@ -59,21 +59,21 @@ public class ImportActivity extends AppCompatActivity {
         tvStatus = findViewById(R.id.tvImportStatus);
 
         // [debug] 从 assets 读取测试 CSV（adb 传 auto_import=true 触发）
-        if (getIntent().getBooleanExtra(EXTRA_AUTO_IMPORT, false)) {
+        if (BuildConfig.DEBUG && getIntent().getBooleanExtra(EXTRA_AUTO_IMPORT, false)) {
             importFromAssets();
             return;
         }
 
         // [debug] 从 intent extra 传文件系统路径
         String debugPath = getIntent().getStringExtra(EXTRA_DEBUG_PATH);
-        if (debugPath != null && !debugPath.isEmpty()) {
+        if (BuildConfig.DEBUG && debugPath != null && !debugPath.isEmpty()) {
             tvStatus.setText("debug 模式，读取: " + debugPath);
             parseFileAtPath(debugPath);
             return;
         }
 
         // [debug] 自动扫描 Download 目录找微信账单 xlsx
-        if (getIntent().getBooleanExtra(EXTRA_AUTO_SCAN, false)) {
+        if (BuildConfig.DEBUG && getIntent().getBooleanExtra(EXTRA_AUTO_SCAN, false)) {
             scanDownloadXlsx();
             return;
         }
@@ -142,6 +142,7 @@ public class ImportActivity extends AppCompatActivity {
             }
 
             // ---------- 方案 B：MediaStore Downloads ----------
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             android.net.Uri collection = android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI;
             String[] projection = {
                     android.provider.MediaStore.MediaColumns._ID,
@@ -178,6 +179,7 @@ public class ImportActivity extends AppCompatActivity {
                 }
             }
 
+            }
             toastAndFinish("没有找到可导入的 .xlsx 文件");
         } catch (Exception e) {
             toastAndFinish("扫描失败: " + e.getMessage());
@@ -405,7 +407,7 @@ public class ImportActivity extends AppCompatActivity {
                 .setMessage(msg.toString())
                 .setPositiveButton("完成", (d, w) -> {
                     // 通知主界面刷新
-                    sendBroadcast(new Intent(MainActivity.ACTION_BILLS_CHANGED));
+                    sendBroadcast(new Intent(MainActivity.ACTION_BILLS_CHANGED).setPackage(getPackageName()));
                     finish();
                 })
                 .setCancelable(false)

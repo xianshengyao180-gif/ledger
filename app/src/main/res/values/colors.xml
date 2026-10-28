@@ -1,59 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 浅色（Light） -->
-    <color name="bg">#FFF4F5F8</color>
-    <color name="card">#FFFFFFFF</color>
-    <color name="text_primary">#FF1B1D22</color>
-    <color name="text_secondary">#FF8B909A</color>
-    <color name="text_tertiary">#FFB4B8C0</color>
-    <color name="accent">#FF4E6AF0</color>
-    <color name="accent_soft">#FFEDF0FE</color>
-    <color name="income">#FF0FA968</color>
-    <color name="expense">#FFE5484D</color>
-    <color name="divider">#FFEDEFF3</color>
-    <color name="warn">#FFE08A2B</color>
-    <color name="dot_off">#FFC6CAD2</color>
-
-    <!-- 深色（Dark） -->
-    <color name="bg_dark">#FF121316</color>
-    <color name="card_dark">#FF1E1F24</color>
-    <color name="text_primary_dark">#FFE8E9ED</color>
-    <color name="text_secondary_dark">#FF9A9EA8</color>
-    <color name="text_tertiary_dark">#FF6B6F7A</color>
-    <color name="accent_dark">#FF6B82F5</color>
-    <color name="accent_soft_dark">#FF1E2340</color>
-    <color name="income_dark">#FF34D37E</color>
-    <color name="expense_dark">#FFFF6B6F</color>
-    <color name="divider_dark">#FF2C2E36</color>
-    <color name="warn_dark">#FFFFC857</color>
-    <color name="dot_off_dark">#FF4A4D55</color>
-
-    <!-- 渠道徽标共用 -->
-    <color name="badge_wechat">#FF07C160</color>
-    <color name="badge_alipay">#FF1677FF</color>
-    <color name="badge_other">#FF7A8494</color>
-
-    <!-- 预算条（画在蓝紫渐变上，浅色深色通用） -->
-    <color name="budget_ok">#FFFFFFFF</color>
-    <color name="budget_warn">#FFFFD166</color>
-    <color name="budget_over">#FFFF8A8A</color>
+    <color name="bg">#F4F1E9</color>
+    <color name="card">#FFFDF7</color>
+    <color name="text_primary">#303B29</color>
+    <color name="text_secondary">#69705F</color>
+    <color name="text_tertiary">#7B826F</color>
+    <color name="accent">#59653C</color>
+    <color name="accent_soft">#E7EBD8</color>
+    <color name="income">#476A43</color>
+    <color name="expense">#303B29</color>
+    <color name="divider">#E0E2D4</color>
+    <color name="warn">#9A6336</color>
+    <color name="dot_off">#9A8C73</color>
+    <color name="bg_dark">#1E211B</color>
+    <color name="card_dark">#292E24</color>
+    <color name="text_primary_dark">#EFF0DE</color>
+    <color name="text_secondary_dark">#B5BBA6</color>
+    <color name="text_tertiary_dark">#8D9680</color>
+    <color name="accent_dark">#C1CD87</color>
+    <color name="accent_soft_dark">#353F2B</color>
+    <color name="income_dark">#C1CD87</color>
+    <color name="expense_dark">#EFF0DE</color>
+    <color name="divider_dark">#404A36</color>
+    <color name="warn_dark">#E6B784</color>
+    <color name="dot_off_dark">#A39880</color>
+    <color name="badge_wechat">#476A43</color>
+    <color name="badge_alipay">#596D77</color>
+    <color name="badge_other">#7B826F</color>
+    <color name="hero_start">#303B29</color>
+    <color name="hero_end">#303B29</color>
+    <color name="hero_text">#FFFDF7</color>
+    <color name="hero_muted">#CDD4C0</color>
+    <color name="hero_divider">#33FFFFFF</color>
+    <color name="budget_ok">#D6E4AE</color>
+    <color name="budget_warn">#E6C480</color>
+    <color name="budget_over">#F0A894</color>
     <color name="budget_track">#33FFFFFF</color>
-    <color name="budget_text">#D9FFFFFF</color>
-    <color name="budget_over_text">#FFFFC9C9</color>
-
-    <!-- 顶部主卡片渐变 -->
-    <color name="hero_start">#FF4E6AF0</color>
-    <color name="hero_end">#FF7C5CF5</color>
-
-    <!-- 横幅背景 -->
-    <color name="banner_bg">#FFFFF4E0</color>
-    <color name="banner_bg_dark">#FF2A2010</color>
-
-    <!-- 多选操作栏 -->
-    <color name="multi_bar_bg">#FF4E6AF0</color>
-    <color name="multi_bar_bg_dark">#FF3B4FCC</color>
-
-    <!-- 透明覆盖层 -->
-    <color name="transparent_light">#33FFFFFF</color>
-    <color name="transparent_dark">#26FFFFFF</color>
+    <color name="budget_text">#CDD4C0</color>
+    <color name="budget_over_text">#F5B9A8</color>
+    <color name="banner_bg">#EFE7D7</color>
+    <color name="banner_bg_dark">#3C3224</color>
+    <color name="multi_bar_bg">#59653C</color>
+    <color name="multi_bar_bg_dark">#434E2E</color>
+    <color name="transparent_light">#26FFFFFF</color>
+    <color name="transparent_dark">#26000000</color>
+    <color name="on_accent">#FFFFFF</color>
+    <color name="button_surface">#303B29</color>
+    <color name="button_text">#FFFDF7</color>
+    <color name="destructive">#A14838</color>
+    <color name="scrim">#80182015</color>
 </resources>

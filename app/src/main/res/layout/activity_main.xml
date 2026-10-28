@@ -1,553 +1,248 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg">
-
-    <!-- 主内容竖向排列-->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-    <!-- 顶部主卡片：本月收支一眼看列-->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginTop="14dp"
-        android:background="@drawable/bg_hero"
-        android:orientation="vertical"
-        android:padding="18dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:letterSpacing="0.08"
-            android:text="本月支出"
-            android:textColor="#CCFFFFFF"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/tvExpense"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:includeFontPadding="false"
-            android:textColor="#FFFFFFFF"
-            android:textSize="34sp"
-            android:textStyle="bold" />
-
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:orientation="horizontal">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/bg_chip"
-                android:orientation="vertical"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="收入"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:id="@+id/tvIncome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:includeFontPadding="false"
-                    android:textColor="#FFFFFFFF"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="10dp"
-                android:background="@drawable/bg_chip"
-                android:orientation="vertical"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="结余"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="11sp" />
-
-                <TextView
-                    android:id="@+id/tvNet"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:includeFontPadding="false"
-                    android:textColor="#FFFFFFFF"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- 预算：没设时是一行提示，设了就变成进度条 + 剩余/日均 -->
-        <TextView
-            android:id="@+id/tvBudgetSet"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
-            android:text="@string/budget_not_set"
-            android:textColor="#B3FFFFFF"
-            android:textSize="12sp" />
-
-        <LinearLayout
-            android:id="@+id/boxBudget"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:id="@+id/tvBudgetLine"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/budget_text"
-                android:textSize="12sp" />
-
-            <ProgressBar
-                android:id="@+id/pbBudget"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="6dp"
-                android:layout_marginTop="6dp"
-                android:max="100"
-                android:progressDrawable="@drawable/budget_progress" />
-
-            <TextView
-                android:id="@+id/tvBudgetSub"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:textColor="@color/budget_text"
-                android:textSize="11sp" />
-        </LinearLayout>
-
-        <!-- 状态行：通知使用权+ 监听服务存活，点它直达自启动设置 -->
-        <LinearLayout
-            android:id="@+id/tvAlive"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingTop="6dp"
-            android:paddingBottom="2dp">
-
-            <View
-                android:id="@+id/dotAlive"
-                android:layout_width="7dp"
-                android:layout_height="7dp"
-                android:background="@drawable/dot_off" />
-
-            <TextView
-                android:id="@+id/tvAliveText"
+            android:paddingStart="24dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="18dp"
+            android:paddingBottom="12dp">
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="7dp"
-                android:maxLines="2"
-                android:textColor="#D9FFFFFF"
-                android:textSize="12sp" />
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:fontFamily="serif"
+                    android:textSize="25sp"
+                    android:letterSpacing="0.04"
+                    android:textColor="@color/text_primary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="@string/home_tagline"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.08"
+                    android:textColor="@color/text_secondary" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/tvAlive"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:background="@drawable/bg_status"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:clickable="true"
+                android:focusable="true">
+                <View
+                    android:id="@+id/dotAlive"
+                    android:layout_width="5dp"
+                    android:layout_height="5dp"
+                    android:background="@drawable/dot_off" />
+                <TextView
+                    android:id="@+id/tvAliveText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:textColor="@color/accent" />
+            </LinearLayout>
         </LinearLayout>
-    
-        <!-- 右上角齿轮：打开侧边抽屉 -->
-        <TextView
-            android:id="@+id/btnDrawerHero"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="end|top"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:gravity="center"
-            android:alpha="0.7"
-            android:text="⚙"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp" />
+        <LinearLayout
+            android:id="@+id/multiBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_multi_bar_accent"
+            android:padding="10dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/tvMultiCount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/on_accent"
+                android:textSize="13sp" />
+            <TextView android:id="@+id/btnMultiCancel" style="@style/Ledger.MultiAction" android:text="@string/add_cancel" />
+            <TextView android:id="@+id/btnMultiSelectAll" style="@style/Ledger.MultiAction" android:text="@string/select_all" />
+            <TextView android:id="@+id/btnMultiDelete" style="@style/Ledger.MultiAction" android:text="@string/delete" />
+        </LinearLayout>
+        <ListView
+            android:id="@+id/lvBills"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="12dp"
+            android:clipToPadding="false"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="8dp"
+            android:scrollbars="none" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="12dp"
+            android:background="@color/bg">
+            <TextView
+                android:id="@+id/btnLedger"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="@string/ledger_tab"
+                android:textSize="11sp"
+                android:textColor="@color/accent"
+                android:gravity="center"
+                android:drawableTop="@drawable/ic_ledger"
+                android:drawableTint="@color/accent"
+                android:drawablePadding="3dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true" />
+            <TextView
+                android:id="@+id/btnPie"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="@string/stats_tab"
+                android:textSize="11sp"
+                android:textColor="@color/text_secondary"
+                android:gravity="center"
+                android:drawableTop="@drawable/ic_chart"
+                android:drawableTint="@color/text_secondary"
+                android:drawablePadding="3dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true" />
+            <TextView
+                android:id="@+id/btnAdd"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1.4"
+                android:layout_marginStart="12dp"
+                android:paddingHorizontal="16dp"
+                android:gravity="center"
+                android:background="@drawable/bg_primary_button"
+                android:drawableStart="@drawable/ic_plus"
+                android:drawableTint="@color/button_text"
+                android:drawablePadding="6dp"
+                android:text="@string/add_bill"
+                android:textSize="14sp"
+                android:textColor="@color/button_text"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
     </LinearLayout>
-
-    <!-- 待确认转账横幅：转账已被接收但金额未定，优先于「选用途列-->
     <TextView
-        android:id="@+id/bannerTransfer"
-        android:layout_width="match_parent"
+        android:id="@+id/saveFeedback"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_banner"
-        android:clickable="true"
-        android:focusable="true"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
-        android:paddingTop="11dp"
-        android:paddingBottom="11dp"
-        android:textColor="@color/warn"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="86dp"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="13dp"
+        android:background="@drawable/bg_primary_button"
+        android:drawableStart="@drawable/ic_check"
+        android:drawableTint="@color/button_text"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="@string/add_saved"
         android:textSize="13sp"
-        android:visibility="gone" />
-
-    <!-- 待分类横幅：有积压才显示，点它逐笔补用列-->
-    <TextView
-        android:id="@+id/banner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_banner"
-        android:clickable="true"
-        android:focusable="true"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
-        android:paddingTop="11dp"
-        android:paddingBottom="11dp"
-        android:textColor="@color/warn"
-        android:textSize="13sp"
-        android:visibility="gone" />
-
-    <!-- 小工具条 ========== -->
-
-    <!-- 侧边抽屉遮罩和面板 -->
-        <!-- 侧边抽屉遮罩和面板 -->
+        android:textColor="@color/button_text"
+        android:visibility="gone"
+        android:accessibilityLiveRegion="polite" />
     <FrameLayout
         android:id="@+id/drawerOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#40000000"
+        android:background="@color/scrim"
         android:clickable="true"
         android:focusable="true"
         android:visibility="gone"
-        android:elevation="4dp">
-
-        <LinearLayout
-            android:id="@+id/drawerPanel"
-            android:layout_width="220dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start|top"
-            android:layout_marginStart="14dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_card"
-            android:elevation="8dp"
-            android:gravity="start"
-            android:orientation="vertical"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingBottom="8dp"
-                android:text="功能"
-                android:textColor="@color/text_tertiary"
-                android:textSize="11sp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:background="@color/divider" />
-
-            <TextView
-                android:id="@+id/btnDarkMode"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center_vertical"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:text=""
-                android:textColor="@color/text_primary"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/btnPie"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center_vertical"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:text="📊  用途占比"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/btnListener"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center_vertical"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:text="🔔  通知使用权"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/btnBattery"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center_vertical"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:text="🔋  电池优化"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/btnImport"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center_vertical"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:text="📄  导入"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/btnDebug"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center_vertical"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:text="📋  原始通知"
-                android:textColor="@color/text_primary"
-                android:textSize="15sp" />
-
-        </LinearLayout>
-    </FrameLayout>
-<!-- 多选操作栏：长按后出现在列表上列-->
-    <LinearLayout
-        android:id="@+id/multiBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="18dp"
-        android:paddingEnd="14dp"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp"
-        android:visibility="gone"
-        android:layout_marginStart="14dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_multi_bar_accent">
-
-        <TextView
-            android:id="@+id/tvMultiCount"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="已选0 项"
-
-            android:textColor="#FFFFFFFF"
-            android:textSize="14sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/btnMultiCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_pill_glass"
-            android:gravity="center"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:text="取消"
-            android:textColor="#FFFFFFFF"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/btnMultiSelectAll"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_pill_glass"
-            android:gravity="center"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:text="全选"
-
-            android:textColor="#FFFFFFFF"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/btnMultiDelete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_delete_btn"
-            android:gravity="center"
-            android:layout_marginStart="8dp"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:text="删除所选"
-
-            android:textColor="#FFFFFFFF"
-            android:textSize="12sp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginTop="16dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/btnPrevMonth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:alpha="0.5"
-            android:padding="8dp"
-            android:text="◀"
-
-            android:textColor="@color/text_secondary"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/tvMonth"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:alpha="0.6"
-            android:gravity="center"
-            android:text="2026年9月"
-
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp" />
-
-        <TextView
-            android:id="@+id/btnNextMonth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:alpha="0.5"
-            android:padding="8dp"
-            android:text="▶"
-
-            android:textColor="@color/text_secondary"
-            android:textSize="16sp" />
-
-    </LinearLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <ListView
-            android:id="@+id/lvBills"
+        android:elevation="8dp">
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="14dp"
-            android:layout_marginEnd="14dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="14dp"
-            android:clipToPadding="false"
-            android:divider="@null"
-            android:dividerHeight="8dp"
-            android:paddingBottom="6dp"
-            android:scrollbars="none" />
-
-        <LinearLayout
-            android:id="@+id/tvEmpty"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:fillViewport="false"
+            android:scrollbars="none">
+            <LinearLayout
+                android:id="@+id/drawerPanel"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:alpha="0.35"
-                android:text="🧾"
-                android:textSize="40sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/no_bills"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
-        </LinearLayout>
+                android:background="@drawable/bg_sheet"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:clickable="true">
+                <View
+                    android:layout_width="32dp"
+                    android:layout_height="4dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="18dp"
+                    android:background="@drawable/bg_handle" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/settings_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/local_data_note"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/btnBudgetSettings"
+                    style="@style/Ledger.SettingsAction"
+                    android:text="@string/budget_title"
+                    android:drawableStart="@drawable/ic_wallet" />
+                <TextView android:id="@+id/btnDarkMode" style="@style/Ledger.SettingsAction" android:drawableStart="@drawable/ic_theme" />
+                <TextView
+                    android:id="@+id/btnListener"
+                    style="@style/Ledger.SettingsAction"
+                    android:text="@string/open_listener"
+                    android:drawableStart="@drawable/ic_bell" />
+                <TextView
+                    android:id="@+id/btnBattery"
+                    style="@style/Ledger.SettingsAction"
+                    android:text="@string/open_battery"
+                    android:drawableStart="@drawable/ic_battery" />
+                <TextView
+                    android:id="@+id/btnImport"
+                    style="@style/Ledger.SettingsAction"
+                    android:text="@string/import_bill"
+                    android:drawableStart="@drawable/ic_import" />
+                <TextView
+                    android:id="@+id/btnDebug"
+                    style="@style/Ledger.SettingsAction"
+                    android:text="@string/raw_noti"
+                    android:drawableStart="@drawable/ic_ledger" />
+            </LinearLayout>
+        </ScrollView>
     </FrameLayout>
-
-    </LinearLayout>
-
-    <!-- 手动记一笔：悬浮按钮。自动记账漏掉/现金/线下时用它补一笔 -->
-    <TextView
-        android:id="@+id/btnAdd"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="end|bottom"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_fab"
-        android:clickable="true"
-        android:elevation="8dp"
-        android:focusable="true"
-        android:gravity="center"
-        android:text="＋"
-        android:textColor="#FFFFFFFF"
-        android:textSize="28sp" />
-
-    <!-- 编辑账单浮动卡片（覆盖全屏） -->
     <include layout="@layout/activity_bill_edit" />
-
-    <!-- 手动记账浮动卡片（覆盖全屏） -->
     <include layout="@layout/activity_add_bill" />
-
 </FrameLayout>

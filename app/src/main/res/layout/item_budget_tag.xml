@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tagRowRoot"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,9 +9,8 @@
     android:paddingEnd="12dp"
     android:paddingTop="10dp"
     android:paddingBottom="10dp"
-    android:minHeight="48dp">
-
-    <!-- 删除按钮（×），始终可见在最左边 -->
+    android:minHeight="48dp"
+    android:background="@drawable/bg_card">
     <ImageView
         android:id="@+id/btnDeleteTag"
         android:layout_width="22dp"
@@ -21,8 +21,6 @@
         android:padding="3dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_close" />
-
-    <!-- 分类名，在删除按钮右边 -->
     <TextView
         android:id="@+id/tvTagName"
         android:layout_width="wrap_content"
@@ -30,11 +28,9 @@
         android:layout_centerVertical="true"
         android:layout_marginStart="8dp"
         android:layout_toEndOf="@id/btnDeleteTag"
-        android:textColor="@android:color/white"
+        android:textColor="@color/text_primary"
         android:textSize="15sp"
         android:textStyle="bold" />
-
-    <!-- 右边输入组，靠右对齐 -->
     <LinearLayout
         android:id="@+id/budgetInputGroup"
         android:layout_width="wrap_content"
@@ -43,15 +39,12 @@
         android:layout_centerVertical="true"
         android:gravity="center_vertical"
         android:orientation="horizontal">
-
-        <!-- 预算输入 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="¥"
-            android:textColor="#88FFFFFF"
+            android:textColor="@color/text_secondary"
             android:textSize="13sp" />
-
         <TextView
             android:id="@+id/etTagBudget"
             android:layout_width="72dp"
@@ -59,19 +52,16 @@
             android:gravity="end|center_vertical"
             android:hint="预算"
             android:paddingHorizontal="4dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="#44FFFFFF"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_tertiary"
             android:textSize="14sp" />
-
-        <!-- 阈值输入 -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
             android:text="阈值%"
-            android:textColor="#88FFFFFF"
+            android:textColor="@color/text_secondary"
             android:textSize="11sp" />
-
         <TextView
             android:id="@+id/etTagThreshold"
             android:layout_width="44dp"
@@ -79,9 +69,8 @@
             android:gravity="end|center_vertical"
             android:hint="80"
             android:paddingHorizontal="4dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="#44FFFFFF"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_tertiary"
             android:textSize="14sp" />
     </LinearLayout>
-
 </RelativeLayout>

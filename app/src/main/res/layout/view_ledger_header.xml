@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="4dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="8dp">
+        <TextView
+            android:id="@+id/tvMonth"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        <ImageButton
+            android:id="@+id/btnPrevMonth"
+            style="@style/Ledger.IconButton"
+            android:src="@drawable/ic_chevron_left"
+            android:contentDescription="@string/previous_month" />
+        <ImageButton
+            android:id="@+id/btnNextMonth"
+            style="@style/Ledger.IconButton"
+            android:src="@drawable/ic_chevron_right"
+            android:contentDescription="@string/next_month" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/boxBudget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="18dp"
+        android:background="@drawable/bg_hero"
+        android:clickable="true"
+        android:focusable="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/budget_hero_note"
+                android:textSize="12sp"
+                android:textColor="@color/hero_muted" />
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_arrow_up_right"
+                app:tint="@color/hero_text"
+                android:importantForAccessibility="no" />
+        </LinearLayout>
+        <FrameLayout android:layout_width="match_parent" android:layout_height="178dp" android:layout_marginVertical="4dp">
+            <com.lele.ledger.BudgetRingView
+                android:id="@+id/budgetRing"
+                android:layout_width="174dp"
+                android:layout_height="174dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no" />
+            <LinearLayout
+                android:layout_width="142dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView
+                    android:id="@+id/tvBudgetTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="11sp"
+                    android:textColor="@color/hero_muted"
+                    android:gravity="center" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvBudgetRemaining"
+                    android:layout_width="match_parent"
+                    android:layout_height="38dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:textColor="@color/hero_text"
+                    android:textSize="28sp"
+                    android:maxLines="1"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="14sp"
+                    app:autoSizeMaxTextSize="28sp"
+                    app:autoSizeStepGranularity="1sp" />
+                <TextView
+                    android:id="@+id/tvBudgetTotal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:textColor="@color/hero_muted" />
+            </LinearLayout>
+        </FrameLayout>
+        <TextView
+            android:id="@+id/tvBudgetSet"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:text="@string/budget_not_set"
+            android:background="@drawable/bg_pill_glass"
+            android:clickable="true"
+            android:focusable="true"
+            android:textColor="@color/hero_text"
+            android:textSize="13sp"
+            android:visibility="gone" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="6dp"
+            android:background="@color/hero_divider" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:id="@+id/tvBudgetLine"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/hero_muted"
+                android:textSize="11sp" />
+            <TextView
+                android:id="@+id/tvBudgetSub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/hero_text"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_card"
+        android:orientation="vertical"
+        android:padding="16dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingEnd="12dp">
+                <TextView style="@style/Ledger.Caption" android:text="@string/month_expense" />
+                <androidx.appcompat.widget.AppCompatTextView android:id="@+id/tvExpense" style="@style/Ledger.Money" />
+            </LinearLayout>
+            <View android:layout_width="1dp" android:layout_height="40dp" android:background="@color/divider" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingStart="20dp">
+                <TextView style="@style/Ledger.Caption" android:text="@string/month_income" />
+                <androidx.appcompat.widget.AppCompatTextView android:id="@+id/tvIncome" style="@style/Ledger.Money" />
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/month_net"
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp" />
+            <TextView
+                android:id="@+id/tvNet"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+    <TextView android:id="@+id/bannerTransfer" style="@style/Ledger.PendingNote" android:drawableStart="@drawable/ic_alert" />
+    <TextView android:id="@+id/banner" style="@style/Ledger.PendingNote" android:drawableStart="@drawable/ic_tag" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/bill_details"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
+            <TextView
+                android:id="@+id/tvListHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:textSize="11sp"
+                android:textColor="@color/text_secondary" />
+        </LinearLayout>
+        <ImageButton
+            android:id="@+id/btnDrawerHero"
+            style="@style/Ledger.IconButton"
+            android:src="@drawable/ic_settings"
+            android:contentDescription="@string/settings_title" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tvEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:paddingVertical="36dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_ledger"
+            app:tint="@color/text_tertiary"
+            android:importantForAccessibility="no" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/no_bills"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:gravity="center" />
+    </LinearLayout>
+</LinearLayout>

@@ -10,3 +10,27 @@ local.properties
 .idea/
 *.iml
 .DS_Store
+
+# 本地密钥和环境配置
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.pem
+*.p12
+*.pfx
+
+# 本地账本、通知、导出和检查产物
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.log
+*.xlsx
+*.xls
+*.csv
+!app/src/debug/assets/*.csv
+/outputs/
+/work/
+/screenshots/

@@ -42,6 +42,9 @@ public class PieChartView extends View {
     private double total;
     private String centerTop = "";
     private String centerBottom = "";
+    private String summaryTop = "";
+    private String summaryBottom = "";
+    private String selectedLabel;
 
     public PieChartView(Context c) {
         this(c, null);
@@ -68,6 +71,26 @@ public class PieChartView extends View {
         }
         centerTop = top == null ? "" : top;
         centerBottom = bottom == null ? "" : bottom;
+        summaryTop = centerTop;
+        summaryBottom = centerBottom;
+        selectedLabel = null;
+        setContentDescription(centerTop + " " + centerBottom);
+        invalidate();
+    }
+
+    public void selectSlice(String label) {
+        selectedLabel = label;
+        centerTop = summaryTop;
+        centerBottom = summaryBottom;
+        for (Slice slice : slices) {
+            if (slice.label.equals(label)) {
+                centerTop = slice.label;
+                centerBottom = String.format(java.util.Locale.CHINA, "¥%,.2f", slice.value);
+                break;
+            }
+        }
+        setContentDescription(centerTop + " " + centerBottom);
+        announceForAccessibility(getContentDescription());
         invalidate();
     }
 
@@ -97,6 +120,7 @@ public class PieChartView extends View {
         for (Slice s : slices) {
             float sweep = (float) (360.0 * s.value / total);
             arcPaint.setColor(s.color);
+            arcPaint.setAlpha(selectedLabel == null || s.label.equals(selectedLabel) ? 255 : 70);
             // 留 2° 缝，相邻两块不糊在一起；太窄的块不留缝，否则会细到看不见
             float draw = sweep >= 6f ? sweep - 2f : sweep;
             cv.drawArc(rect, start, draw, false, arcPaint);
@@ -105,7 +129,10 @@ public class PieChartView extends View {
 
         smallPaint.setTextSize(sp(12));
         cv.drawText(centerTop, cx, cy - dp(6), smallPaint);
-        bigPaint.setTextSize(sp(17));
+        bigPaint.setTextSize(sp(24));
+        float available = Math.max(dp(60), r * 2 - stroke - dp(16));
+        float measured = bigPaint.measureText(centerBottom);
+        if (measured > available) bigPaint.setTextSize(bigPaint.getTextSize() * available / measured);
         cv.drawText(centerBottom, cx, cy + dp(18), bigPaint);
     }
 

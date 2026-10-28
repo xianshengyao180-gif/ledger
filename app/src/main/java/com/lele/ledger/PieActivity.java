@@ -15,6 +15,9 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Calendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * 用途占比页：一张圆环图 + 一份图例。
@@ -33,11 +36,19 @@ public class PieActivity extends AppCompatActivity {
     private TextView btnIncome;
 
     private boolean income = false;
+    private long monthStart;
+    private String selectedLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pie);
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        monthStart = getIntent().getLongExtra("month_start", Budget.monthStart());
+        Calendar month = Calendar.getInstance();
+        month.setTimeInMillis(monthStart);
+        ((TextView) findViewById(R.id.tvStatsMonth)).setText(String.format(Locale.CHINA,
+                "%d年 %d月", month.get(Calendar.YEAR), month.get(Calendar.MONTH) + 1));
 
         db = new Db(this);
         pie = findViewById(R.id.pie);
@@ -57,35 +68,40 @@ public class PieActivity extends AppCompatActivity {
         income = wantIncome;
         btnExpense.setBackgroundResource(income ? R.drawable.bg_pill : R.drawable.bg_pill_accent);
         btnExpense.setTextColor(ContextCompat.getColor(this,
-                income ? R.color.text_secondary : android.R.color.white));
+                income ? R.color.text_secondary : R.color.on_accent));
         btnIncome.setBackgroundResource(income ? R.drawable.bg_pill_accent : R.drawable.bg_pill);
         btnIncome.setTextColor(ContextCompat.getColor(this,
-                income ? android.R.color.white : R.color.text_secondary));
+                income ? R.color.on_accent : R.color.text_secondary));
+        btnExpense.setSelected(!income);
+        btnIncome.setSelected(income);
 
         render();
     }
 
     private void render() {
-        long since = Budget.monthStart();
-        List<String[]> rows = db.categoryTotals(since, income);
+        Map<String, Double> totals = new LinkedHashMap<>();
+        int uncat = 0;
+        for (Bill bill : db.recentInMonth(monthStart)) {
+            if ((bill.amount >= 0) != income) continue;
+            String category = bill.uncategorized() ? Category.NONE : bill.category;
+            totals.put(category, totals.getOrDefault(category, 0d) + Math.abs(bill.amount));
+            if (bill.uncategorized()) uncat++;
+        }
 
         List<PieChartView.Slice> slices = new ArrayList<>();
         double total = 0;
-        for (String[] r : rows) {
-            double v = 0;
-            try {
-                v = Double.parseDouble(r[1]);
-            } catch (NumberFormatException ignored) {
-                // 解析不出就跳过，别让一条坏数据毁掉整张图
-            }
+        for (Map.Entry<String, Double> entry : totals.entrySet()) {
+            double v = entry.getValue();
             if (v > 0) {
-                slices.add(new PieChartView.Slice(r[0], v, Category.colorOf(r[0])));
+                slices.add(new PieChartView.Slice(entry.getKey(), v, Category.colorOf(entry.getKey())));
                 total += v;
             }
         }
+        slices.sort((left, right) -> Double.compare(right.value, left.value));
+        selectedLabel = null;
 
-        pie.setSlices(slices, income ? "本月收入" : "本月支出",
-                String.format(Locale.CHINA, "¥%.2f", total));
+        pie.setSlices(slices, income ? "收入合计" : "支出合计",
+                String.format(Locale.CHINA, "¥%,.2f", total));
 
         boxLegend.removeAllViews();
         for (PieChartView.Slice s : slices) {
@@ -94,7 +110,6 @@ public class PieActivity extends AppCompatActivity {
 
         tvNoData.setVisibility(slices.isEmpty() ? View.VISIBLE : View.GONE);
 
-        int uncat = db.uncategorizedCount(since, income);
         if (uncat > 0) {
             // 直接说清「饼图里那块灰的是什么、怎么消掉」，比让用户自己猜好
             tvHint.setText(String.format(Locale.CHINA,
@@ -109,6 +124,20 @@ public class PieActivity extends AppCompatActivity {
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(10), dp(12), dp(10), dp(12));
+        row.setMinimumHeight(dp(52));
+        row.setFocusable(true);
+        row.setOnClickListener(v -> {
+            selectedLabel = s.label.equals(selectedLabel) ? null : s.label;
+            pie.selectSlice(selectedLabel);
+            for (int index = 0; index < boxLegend.getChildCount(); index++) {
+                View legend = boxLegend.getChildAt(index);
+                boolean selected = selectedLabel != null && selectedLabel.equals(legend.getTag());
+                legend.setSelected(selected);
+                legend.setBackgroundResource(selected ? R.drawable.bg_pill : android.R.color.transparent);
+            }
+        });
+        row.setTag(s.label);
         LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         rlp.topMargin = dp(8);
@@ -132,7 +161,7 @@ public class PieActivity extends AppCompatActivity {
 
         TextView pct = new TextView(this);
         pct.setText(total > 0
-                ? String.format(Locale.CHINA, "%.0f%%", s.value * 100 / total)
+                ? String.format(Locale.CHINA, "%.1f%%", s.value * 100 / total)
                 : "—");
         pct.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
         pct.setTextSize(13);
@@ -143,9 +172,9 @@ public class PieActivity extends AppCompatActivity {
         row.addView(pct, plp);
 
         TextView amount = new TextView(this);
-        amount.setText(String.format(Locale.CHINA, "¥%.2f", s.value));
+        amount.setText(String.format(Locale.CHINA, "¥%,.2f", s.value));
         amount.setTextColor(ContextCompat.getColor(this,
-                income ? R.color.income : R.color.expense));
+                R.color.text_primary));
         amount.setTextSize(14);
         amount.setGravity(Gravity.END);
         row.addView(amount, new LinearLayout.LayoutParams(

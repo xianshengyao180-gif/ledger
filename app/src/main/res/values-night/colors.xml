@@ -15,4 +15,19 @@
     <color name="banner_bg">@color/banner_bg_dark</color>
     <color name="multi_bar_bg">@color/multi_bar_bg_dark</color>
     <color name="transparent_light">@color/transparent_dark</color>
+    <color name="hero_start">#DCE5C6</color>
+    <color name="hero_end">#DCE5C6</color>
+    <color name="hero_text">#28331F</color>
+    <color name="hero_muted">#526145</color>
+    <color name="hero_divider">#3328331F</color>
+    <color name="budget_ok">#647E46</color>
+    <color name="budget_warn">#86621E</color>
+    <color name="budget_over">#A14838</color>
+    <color name="budget_track">#3328331F</color>
+    <color name="budget_text">#526145</color>
+    <color name="budget_over_text">#933C2E</color>
+    <color name="on_accent">#28331F</color>
+    <color name="button_surface">#DCE5C6</color>
+    <color name="button_text">#28331F</color>
+    <color name="destructive">#F0A894</color>
 </resources>

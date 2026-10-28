@@ -53,6 +53,7 @@ public class BudgetActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_budget);
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         db = new Db(this);
 
@@ -127,8 +128,8 @@ public class BudgetActivity extends AppCompatActivity {
         ImageView btnDeleteTag = row.findViewById(R.id.btnDeleteTag);
 
         // 整行背景根据用途着色
-        int color = Category.colorOf(name);
-        row.setBackgroundColor(color);
+        row.setBackgroundResource(R.drawable.bg_card);
+        btnDeleteTag.setColorFilter(getColor(R.color.destructive));
 
         tvTagName.setText(name);
         refreshTagRowDisplay(etTagBudget, etTagThreshold, entry);
@@ -179,13 +180,13 @@ public class BudgetActivity extends AppCompatActivity {
         etThresholdExtra.setHint("预警阈值（%）");
         etThresholdExtra.setText(String.valueOf(entry.threshold));
         etThresholdExtra.setSelection(etThresholdExtra.getText().length());
-        etThresholdExtra.setBackgroundResource(R.drawable.bg_hero);
+        etThresholdExtra.setBackgroundResource(R.drawable.bg_card);
         etThresholdExtra.setPadding(dp(12), dp(12), dp(12), dp(12));
-        etThresholdExtra.setTextColor(0xFFFFFFFF);
+        etThresholdExtra.setTextColor(getColor(R.color.text_primary));
         etThresholdExtra.setTextSize(16);
 
         // 插到 input 后面
-        ViewGroup cardRoot = (ViewGroup) overlay;
+        ViewGroup cardRoot = overlay.findViewById(R.id.dialogCard);
         int inputIx = cardRoot.indexOfChild(input);
         if (inputIx >= 0) {
             cardRoot.addView(etThresholdExtra, inputIx + 1);
@@ -225,7 +226,7 @@ public class BudgetActivity extends AppCompatActivity {
         overlay.findViewById(R.id.dialogCancel).setVisibility(View.GONE);
         overlay.findViewById(R.id.dialogConfirm).setVisibility(View.GONE);
 
-        ViewGroup card = (ViewGroup) overlay;
+        ViewGroup card = overlay.findViewById(R.id.dialogCard);
         LinearLayout gridBox = new LinearLayout(this);
         gridBox.setOrientation(LinearLayout.VERTICAL);
         gridBox.setPadding(0, dp(20), 0, 0);
@@ -281,21 +282,21 @@ public class BudgetActivity extends AppCompatActivity {
 
     private void updateSummary(double budget, double spent) {
         if (budget <= 0) {
-            tvTitle.setText("当前：未设预算");
-            tvAmount.setText("请填写或关闭");
+            tvTitle.setText(R.string.budget_no_limit);
+            tvAmount.setText(R.string.budget_unset_value);
             tvSub.setText("本月已支出 ¥" + String.format(Locale.CHINA, "%.2f", spent));
         } else {
             int pct = (int) Math.floor(spent * 100 / budget);
-            String label = "当前：设了预算";
+            String label = getString(R.string.budget_remaining);
             if (spent > budget) {
-                label = "当前：已超支";
+                label = getString(R.string.budget_exceeded);
             } else if (pct >= Budget.threshold(this)) {
-                label = "当前：已达预警线";
+                label = "接近预算额度";
             }
             tvTitle.setText(label);
-            tvAmount.setText(String.format(Locale.CHINA, "¥%.2f ／ ¥%.2f", spent, budget));
+            tvAmount.setText(String.format(Locale.CHINA, "¥%,.2f", Math.abs(budget - spent)));
             tvSub.setText("已用 " + pct + "%　·　" +
-                    String.format(Locale.CHINA, "剩余 ¥%.2f", budget - spent));
+                    String.format(Locale.CHINA, "总预算 ¥%,.2f", budget));
         }
     }
 

@@ -14,6 +14,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -196,23 +197,14 @@ public class BillAdapter extends BaseAdapter {
         Bill b = items.get(position);
         String ch = b.channel == null ? "" : b.channel;
 
-        // 徽标
-        GradientDrawable dot = new GradientDrawable();
-        dot.setShape(GradientDrawable.OVAL);
-        if (!b.uncategorized()) {
-            dot.setColor(Category.colorOf(b.category));
-        } else {
-            dot.setColor(ContextCompat.getColor(ctx, channelColor(ch)));
-        }
-        h.tvBadge.setBackground(dot);
-        String mark = !b.uncategorized() ? b.category : ch;
-        h.tvBadge.setText(mark.isEmpty() ? "?" : mark.substring(0, 1));
+        h.tvBadge.setImageResource(LedgerIcons.forCategory(b.category));
+        h.tvBadge.setColorFilter(ContextCompat.getColor(ctx, R.color.accent));
 
         h.tvTitle.setText(b.title == null || b.title.isEmpty() ? ch : b.title);
         h.tvSub.setText(subText(b, ch));
 
-        String sign = b.amount >= 0 ? "+" : "-";
-        h.tvAmount.setText(String.format(Locale.CHINA, "%s¥%.2f", sign, Math.abs(b.amount)));
+        String sign = b.amount >= 0 ? "+" : "−";
+        h.tvAmount.setText(String.format(Locale.CHINA, "%s%,.2f", sign, Math.abs(b.amount)));
         h.tvAmount.setTextColor(ContextCompat.getColor(ctx,
                 b.amount >= 0 ? R.color.income : R.color.expense));
 
@@ -410,7 +402,7 @@ public class BillAdapter extends BaseAdapter {
         final View contentView;  // 滑动主体
         final View deleteBtn;    // 滑动露出的删除按钮
         final CheckBox cbCheck;  // 多选勾选框
-        final TextView tvBadge;
+        final ImageView tvBadge;
         final TextView tvTitle;
         final TextView tvSub;
         final TextView tvAmount;

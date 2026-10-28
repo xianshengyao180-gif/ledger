@@ -13,7 +13,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -23,7 +22,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +57,8 @@ public class MainActivity extends AppCompatActivity {
     private View boxBudget;
     private TextView tvBudgetLine;
     private TextView tvBudgetSub;
-    private ProgressBar pbBudget;
+    private BudgetRingView budgetRing;
+    private TextView tvBudgetTitle, tvBudgetRemaining, tvBudgetTotal;
     private TextView banner;
     private TextView bannerTransfer;
 
@@ -100,10 +99,12 @@ public class MainActivity extends AppCompatActivity {
 
 
     private boolean receiverRegistered = false;
+    private final Runnable refreshAfterStart = this::refresh;
 
     /** 月份偏移：0=本月，-1=上月，+1=下月 */
     private int monthOffset = 0;
-    private TextView tvMonth, btnPrevMonth, btnNextMonth;
+    private TextView tvMonth;
+    private View btnPrevMonth, btnNextMonth;
     private TextView tvListHint;
 
     /** 按偏移月返回当月1日0点时间戳 */
@@ -127,33 +128,42 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        AppCompatDelegate.setDefaultNightMode(getSharedPreferences("prefs", MODE_PRIVATE)
+                .getBoolean("dark_mode", false) ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ListView list = findViewById(R.id.lvBills);
+        View header = getLayoutInflater().inflate(R.layout.view_ledger_header, list, false);
+        list.addHeaderView(header, null, false);
+
         db = new Db(this);
-        tvExpense = findViewById(R.id.tvExpense);
-        tvIncome = findViewById(R.id.tvIncome);
-        tvNet = findViewById(R.id.tvNet);
+        tvExpense = header.findViewById(R.id.tvExpense);
+        tvIncome = header.findViewById(R.id.tvIncome);
+        tvNet = header.findViewById(R.id.tvNet);
         tvAliveText = findViewById(R.id.tvAliveText);
         dotAlive = findViewById(R.id.dotAlive);
-        tvEmpty = findViewById(R.id.tvEmpty);
-        tvMonth = findViewById(R.id.tvMonth);
-        btnPrevMonth = findViewById(R.id.btnPrevMonth);
-        btnNextMonth = findViewById(R.id.btnNextMonth);
-        tvBudgetSet = findViewById(R.id.tvBudgetSet);
-        boxBudget = findViewById(R.id.boxBudget);
-        tvBudgetLine = findViewById(R.id.tvBudgetLine);
-        tvBudgetSub = findViewById(R.id.tvBudgetSub);
-        pbBudget = findViewById(R.id.pbBudget);
+        tvEmpty = header.findViewById(R.id.tvEmpty);
+        tvMonth = header.findViewById(R.id.tvMonth);
+        btnPrevMonth = header.findViewById(R.id.btnPrevMonth);
+        btnNextMonth = header.findViewById(R.id.btnNextMonth);
+        tvBudgetSet = header.findViewById(R.id.tvBudgetSet);
+        boxBudget = header.findViewById(R.id.boxBudget);
+        tvBudgetLine = header.findViewById(R.id.tvBudgetLine);
+        tvBudgetSub = header.findViewById(R.id.tvBudgetSub);
+        tvBudgetTitle = header.findViewById(R.id.tvBudgetTitle);
+        tvBudgetRemaining = header.findViewById(R.id.tvBudgetRemaining);
+        tvBudgetTotal = header.findViewById(R.id.tvBudgetTotal);
+        budgetRing = header.findViewById(R.id.budgetRing);
+        tvListHint = header.findViewById(R.id.tvListHint);
         // 下拉刷新已去除
-        banner = findViewById(R.id.banner);
-        bannerTransfer = findViewById(R.id.bannerTransfer);
+        banner = header.findViewById(R.id.banner);
+        bannerTransfer = header.findViewById(R.id.bannerTransfer);
 
         // 预算两处入口：没设时点提示行，设了点进度条本身
         tvBudgetSet.setOnClickListener(v -> showBudgetDialog());
         boxBudget.setOnClickListener(v -> showBudgetDialog());
 
-        ListView list = findViewById(R.id.lvBills);
         adapter = new BillAdapter(this);
 
         // 右划删除——弹确认
@@ -270,8 +280,10 @@ public class MainActivity extends AppCompatActivity {
         // 阻止卡片区域的点击穿透
         confirmOverlay.findViewById(R.id.confirmCard).setOnClickListener(null);
 
+        findViewById(R.id.btnLedger).setOnClickListener(v -> list.smoothScrollToPosition(0));
         findViewById(R.id.btnPie).setOnClickListener(v ->
-                startActivity(new Intent(this, PieActivity.class)));
+                startActivity(new Intent(this, PieActivity.class).putExtra("month_start", offsetMonthStart())));
+        findViewById(R.id.btnBudgetSettings).setOnClickListener(v -> showBudgetDialog());
         // 待分类横幅：点进去显示所有未分类记录列表，跟主界面一样可滑动/点选
         banner.setOnClickListener(v ->
                 startActivity(new Intent(this, UncategorizedBulkActivity.class)));
@@ -286,7 +298,12 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnDebug).setOnClickListener(v -> showRawNotifications());
 
         // 点状态行直达「自启动管理」——ColorOS 上不放开这里，常驻服务活不过重启
-        findViewById(R.id.tvAlive).setOnClickListener(v -> openAutoStartSettings());
+        findViewById(R.id.tvAlive).setOnClickListener(v -> new AlertDialog.Builder(this)
+                .setTitle(R.string.open_listener)
+                .setMessage(findViewById(R.id.tvAlive).getContentDescription())
+                .setPositiveButton(R.string.open_listener, (dialog, which) -> openListenerSettings())
+                .setNeutralButton(R.string.open_autostart, (dialog, which) -> openAutoStartSettings())
+                .setNegativeButton(R.string.add_cancel, null).show());
 
         // 列表为空时，点空白区域也能直接看原始通知，省得找不到按钮
         tvEmpty.setOnClickListener(v -> showRawNotifications());
@@ -297,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener toggleDrawerListener = v -> toggleDrawer(drawerOverlay, drawerPanel);
         // btnDrawer 入口已统一到 btnDrawerHero
         // 英雄卡右上角齿轮也绑定同一切换
-        findViewById(R.id.btnDrawerHero).setOnClickListener(toggleDrawerListener);
+        header.findViewById(R.id.btnDrawerHero).setOnClickListener(toggleDrawerListener);
         // 点击遮罩关闭抽屉
         drawerOverlay.setOnClickListener(v -> closeDrawer(drawerOverlay, drawerPanel));
         // 阻止面板区域点击穿透（点面板本身不关闭）
@@ -316,7 +333,7 @@ public class MainActivity extends AppCompatActivity {
         TextView btnDarkMode = findViewById(R.id.btnDarkMode);
         boolean isDark = getSharedPreferences("prefs", MODE_PRIVATE)
                 .getBoolean("dark_mode", false);
-        btnDarkMode.setText(isDark ? "☀️  浅色模式" : "🌙  深色模式");
+        btnDarkMode.setText(isDark ? R.string.light_mode : R.string.dark_mode);
         btnDarkMode.setOnClickListener(v -> {
             boolean nowDark = !getSharedPreferences("prefs", MODE_PRIVATE)
                     .getBoolean("dark_mode", false);
@@ -341,91 +358,8 @@ public class MainActivity extends AppCompatActivity {
         // 注：dark mode toggle 通过 recreate() 进入 onCreate，此处不再额外刷新通知
         // BillNotify.refresh 仅在保存编辑时调用（saveBillEdit）
 
-        // 静默导入：先用 ContentResolver 查 MediaStore Downloads
-        // （兼容所有 Android 版本），再尝试文件系统路径
-        new Thread(() -> {
-            try {
-                android.util.Log.d("LedgerMain", "autoImport: started");
-                java.io.InputStream in = null;
-                String foundName = null;
+        // 账单文件只通过导入入口或系统文件分享读取。
 
-                // 方案 A：MediaStore Downloads（Android 10+）
-                try {
-                    android.util.Log.d("LedgerMain", "autoImport: trying MediaStore.Downloads");
-                    android.net.Uri collection = android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI;
-                    android.database.Cursor c = getContentResolver().query(
-                            collection,
-                            new String[]{android.provider.MediaStore.MediaColumns._ID, android.provider.MediaStore.MediaColumns.DISPLAY_NAME},
-                            null, null,
-                            android.provider.MediaStore.MediaColumns.DATE_MODIFIED + " DESC");
-                    if (c != null) {
-                        int count = c.getCount();
-                        android.util.Log.d("LedgerMain", "MediaStore cursor count: " + count);
-                        while (c.moveToNext()) {
-                            String name = c.getString(1);
-                            android.util.Log.d("LedgerMain", "MediaStore file: " + name);
-                            if (name != null && name.toLowerCase(Locale.CHINA).endsWith(".xlsx")) {
-                                android.net.Uri fileUri = android.net.Uri.withAppendedPath(
-                                        collection, String.valueOf(c.getLong(0)));
-                                in = getContentResolver().openInputStream(fileUri);
-                                foundName = name;
-                                android.util.Log.d("LedgerMain", "MediaStore found xlsx: " + name);
-                                break;
-                            }
-                        }
-                        c.close();
-                    } else {
-                        android.util.Log.d("LedgerMain", "MediaStore cursor is null");
-                    }
-                } catch (Exception e) {
-                    android.util.Log.e("LedgerMain", "MediaStore failed: " + e.getMessage());
-                }
-
-                // 方案 B：直接读文件系统路径（/data/local/tmp/ 可全局读，/sdcard/Download 被 Android 11+ 限制）
-                if (in == null) {
-                    android.util.Log.d("LedgerMain", "autoImport: trying direct filesystem");
-                    String[] candidates = {
-                        "/data/local/tmp/com.lele.ledger/wx_bill_import.xlsx",
-                        "/sdcard/Download/wx_bill_import.xlsx",
-                        "/sdcard/Download/微信账单_202609.xlsx",
-                        "/storage/emulated/0/Download/wx_bill_import.xlsx",
-                        "/storage/emulated/0/Download/微信账单_202609.xlsx"
-                    };
-                    for (String path : candidates) {
-                        java.io.File f = new java.io.File(path);
-                        android.util.Log.d("LedgerMain", "check: " + path + " exists=" + f.exists() + " size=" + f.length());
-                        if (f.isFile() && f.length() > 100) {
-                            in = new java.io.FileInputStream(f);
-                            foundName = f.getName();
-                            android.util.Log.d("LedgerMain", "opened: " + path);
-                            break;
-                        }
-                    }
-                }
-
-                if (in == null) {
-                    android.util.Log.d("LedgerMain", "autoImport: no file found");
-                    return;
-                }
-
-                android.util.Log.d("LedgerMain", "autoImport: parsing " + foundName);
-                CsvImporter.Result r = ExcelImporter.importExcel(MainActivity.this, in);
-                in.close();
-
-                android.util.Log.d("LedgerMain", "autoImport result: imported=" + r.imported
-                        + " duplicate=" + r.duplicate + " skipped=" + r.skipped + " invalid=" + r.invalid);
-
-                if (r.imported > 0) {
-                    final String msg = r.imported + " 笔已自动导入";
-                    runOnUiThread(() -> {
-                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
-                        refresh();
-                    });
-                }
-            } catch (Exception e) {
-                android.util.Log.e("LedgerMain", "autoImport error: " + e.getMessage(), e);
-            }
-        }).start();
     }
 
     /** 点某条记录 → 弹出编辑卡片修改金额/用途。 */
@@ -485,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
         BillNotify.refresh(this, db);
         hideBillEditor();
         refresh();
-        Toast.makeText(this, "已保存", Toast.LENGTH_SHORT).show();
+        showSaveFeedback();
     }
 
     /** 显示分类选择弹窗。 */
@@ -690,7 +624,19 @@ public class MainActivity extends AppCompatActivity {
 
         hideAddCard();
         refresh();
-        Toast.makeText(this, R.string.add_saved, Toast.LENGTH_SHORT).show();
+        showSaveFeedback();
+    }
+
+    private void showSaveFeedback() {
+        View feedback = findViewById(R.id.saveFeedback);
+        feedback.animate().cancel();
+        feedback.setVisibility(View.VISIBLE);
+        feedback.setAlpha(0f);
+        feedback.setTranslationY(dp(10));
+        feedback.animate().setStartDelay(0).alpha(1f).translationY(0).setDuration(180)
+                .withEndAction(() -> feedback.animate().alpha(0f).setStartDelay(1400)
+                        .setDuration(180).withEndAction(() -> feedback.setVisibility(View.GONE)).start()).start();
+        feedback.announceForAccessibility(getString(R.string.save_complete));
     }
 
     @Override
@@ -705,12 +651,13 @@ public class MainActivity extends AppCompatActivity {
         refresh();
         // 常驻服务是异步启动的，onResume 时它可能还没跑起来，
         // 于是首屏会误报「常驻未开」。稍后再刷一次（服务起来时会广播，这是双保险）。
-        dotAlive.postDelayed(this::refresh, 1500);
+        dotAlive.postDelayed(refreshAfterStart, 1500);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        dotAlive.removeCallbacks(refreshAfterStart);
         if (receiverRegistered) {
             try {
                 unregisterReceiver(billsChanged);
@@ -734,18 +681,19 @@ public class MainActivity extends AppCompatActivity {
         List<Bill> bills = db.recentInMonth(start);
         adapter.setItems(bills);
         tvEmpty.setVisibility(bills.isEmpty() ? View.VISIBLE : View.GONE);
+        tvListHint.setText(getString(R.string.bill_count, bills.size()));
 
         // 偏移月的汇总
         double[] t = db.monthTotals(start);
-        tvExpense.setText(String.format(Locale.CHINA, "¥%.2f", t[1]));
-        tvIncome.setText(String.format(Locale.CHINA, "¥%.2f", t[0]));
+        tvExpense.setText(String.format(Locale.CHINA, "¥%,.2f", t[1]));
+        tvIncome.setText(String.format(Locale.CHINA, "¥%,.2f", t[0]));
         double net = t[0] - t[1];
-        tvNet.setText(String.format(Locale.CHINA, "%s¥%.2f", net < 0 ? "-" : "", Math.abs(net)));
+        tvNet.setText(String.format(Locale.CHINA, "%s¥%,.2f", net < 0 ? "−" : "", Math.abs(net)));
 
         // 更新时间标签和下页禁用
         java.util.Calendar c = java.util.Calendar.getInstance();
         c.add(java.util.Calendar.MONTH, monthOffset);
-        tvMonth.setText(String.format(Locale.CHINA, "%d年%02d月",
+        tvMonth.setText(String.format(Locale.CHINA, "%d年 %d月",
                 c.get(java.util.Calendar.YEAR), c.get(java.util.Calendar.MONTH) + 1));
         // 不能翻到下个月（还没过完）
         btnNextMonth.setEnabled(monthOffset < 0);
@@ -795,6 +743,11 @@ public class MainActivity extends AppCompatActivity {
             hideBillEditor();
             return;
         }
+        View drawer = findViewById(R.id.drawerOverlay);
+        if (drawer.getVisibility() == View.VISIBLE) {
+            closeDrawer(drawer, findViewById(R.id.drawerPanel));
+            return;
+        }
         if (adapter.isMultiSelectMode()) {
             exitMultiSelect();
             return;
@@ -812,40 +765,35 @@ public class MainActivity extends AppCompatActivity {
         double budget = Budget.amount(this);
         if (budget <= 0) {
             tvBudgetSet.setVisibility(View.VISIBLE);
-            boxBudget.setVisibility(View.GONE);
+            tvBudgetTitle.setText(R.string.budget_unset_title);
+            tvBudgetRemaining.setText(R.string.budget_unset_value);
+            tvBudgetTotal.setText(R.string.budget_unset_note);
+            tvBudgetLine.setText(R.string.budget_no_limit);
+            tvBudgetSub.setText("");
+            tvBudgetLine.setTextColor(getColorCompat(R.color.hero_muted));
+            tvBudgetRemaining.setTextColor(getColorCompat(R.color.hero_text));
+            budgetRing.setProgress(0, getColorCompat(R.color.budget_ok));
+            boxBudget.setContentDescription(getString(R.string.budget_disabled));
             return;
         }
         tvBudgetSet.setVisibility(View.GONE);
-        boxBudget.setVisibility(View.VISIBLE);
-
-        int pct = (int) Math.floor(spent * 100 / budget);
+        double pct = spent * 100 / budget;
         boolean over = spent > budget;
         int th = Budget.threshold(this);
         boolean warn = !over && th > 0 && pct >= th;
-
-        Drawable d = pbBudget.getProgressDrawable();
-        if (d != null) {
-            d = d.mutate();
-            d.setTint(ContextCompat.getColor(this,
-                    over ? R.color.budget_over : (warn ? R.color.budget_warn : R.color.budget_ok)));
-            pbBudget.setProgressDrawable(d);
-        }
-        pbBudget.setProgress(Math.min(100, Math.max(0, pct)));
-
-        tvBudgetLine.setText(String.format(Locale.CHINA,
-                "预算 ¥%.2f　·　已用 %d%%", budget, pct));
-        tvBudgetLine.setTextColor(ContextCompat.getColor(this,
-                over ? R.color.budget_over_text : R.color.budget_text));
-
-        if (over) {
-            tvBudgetSub.setText(String.format(Locale.CHINA,
-                    "已超支 ¥%.2f　·　点此调整", spent - budget));
-        } else {
-            // 钱迹那种「日均可用」：把剩下的钱摊到本月剩余天数
-            double daily = (budget - spent) / Budget.daysLeft();
-            tvBudgetSub.setText(String.format(Locale.CHINA,
-                    "剩余 ¥%.2f　·　日均可用 ¥%.2f", budget - spent, daily));
-        }
+        budgetRing.setProgress((float) (spent / budget), getColorCompat(
+                over ? R.color.budget_over : warn ? R.color.budget_warn : R.color.budget_ok));
+        tvBudgetTitle.setText(over ? R.string.budget_exceeded : R.string.budget_remaining);
+        tvBudgetRemaining.setText(String.format(Locale.CHINA, "¥%,.2f", Math.abs(budget - spent)));
+        tvBudgetRemaining.setTextColor(getColorCompat(over ? R.color.budget_over_text : R.color.hero_text));
+        tvBudgetTotal.setText(getString(monthOffset == 0 ? R.string.budget_total : R.string.budget_reference, budget));
+        tvBudgetLine.setText(getString(R.string.budget_used, pct));
+        tvBudgetLine.setTextColor(getColorCompat(over ? R.color.budget_over_text : R.color.hero_muted));
+        tvBudgetSub.setText(monthOffset != 0 ? getString(R.string.budget_history_note)
+                : over ? getString(R.string.budget_adjust)
+                : getString(R.string.budget_daily, (budget - spent) / Budget.daysLeft()));
+        boxBudget.setContentDescription(getString(R.string.budget_a11y,
+                tvBudgetTitle.getText(), tvBudgetRemaining.getText(), pct));
     }
 
     /** 设置月度预算与预警阈值。全屏 Activity，风格统一。 */
@@ -968,11 +916,13 @@ public class MainActivity extends AppCompatActivity {
 
     /** 打开侧边抽屉：遮罩淡入，面板从左滑入。 */
         private void openDrawer(View overlay, View panel) {
-        panel.setTranslationX(-panel.getWidth() - 60);
+        panel.animate().cancel();
+        overlay.animate().cancel();
+        panel.setTranslationY(dp(40));
         overlay.setAlpha(0f);
         overlay.setVisibility(View.VISIBLE);
         overlay.animate().alpha(1f).setDuration(150).start();
-        panel.animate().translationX(0).setDuration(250)
+        panel.animate().translationY(0).setDuration(280)
                 .setInterpolator(new android.view.animation.DecelerateInterpolator()).start();
     }
     /** 关闭侧边抽屉：遮罩淡出，面板向左滑出。 */
@@ -980,7 +930,7 @@ public class MainActivity extends AppCompatActivity {
         overlay.animate().alpha(0f).setDuration(200)
                 .withEndAction(() -> overlay.setVisibility(View.GONE))
                 .start();
-        panel.animate().translationX(-panel.getWidth() - 60).setDuration(200).start();
+        panel.animate().translationY(dp(40)).setDuration(200).start();
     }
     /**
      * 首页直接回答「监听服务现在到底还活着吗」——这是排查某笔没记上时最关键的证据。
@@ -992,7 +942,8 @@ public class MainActivity extends AppCompatActivity {
     private void refreshAlive(boolean authorized) {
         if (!authorized) {
             dotAlive.setBackgroundResource(R.drawable.dot_off);
-            tvAliveText.setText("监听服务未授权，通知收不到　·　点此设置");
+            tvAliveText.setText(R.string.listening_permission);
+            findViewById(R.id.tvAlive).setContentDescription("监听服务未授权，通知收不到，点击设置");
             return;
         }
         long last = db.lastMarkTs();
@@ -1020,7 +971,8 @@ public class MainActivity extends AppCompatActivity {
         String keep = KeepAliveService.RUNNING ? "常驻已开" : "常驻未开，点此设自启动";
         dotAlive.setBackgroundResource(ok && KeepAliveService.RUNNING
                 ? R.drawable.dot_ok : R.drawable.dot_off);
-        tvAliveText.setText("监听服务：" + beat + "　·　" + keep);
+        tvAliveText.setText(ok && KeepAliveService.RUNNING ? R.string.listening_active : R.string.listening_attention);
+        findViewById(R.id.tvAlive).setContentDescription("监听服务：" + beat + "，" + keep);
     }
 
     /**

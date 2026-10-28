@@ -128,7 +128,7 @@ public class NotiListener extends NotificationListenerService {
         }
         // 入口就记一笔：即使后面解析失败，也能证明「通知确实进来了」
         try {
-            Log.i(TAG, "通知到达 pkg=" + sbn.getPackageName() + " key=" + sbn.getKey());
+            Log.i(TAG, "收到通知事件");
         } catch (Throwable ignored) {
             // 日志失败不影响主流程
         }
@@ -185,8 +185,7 @@ public class NotiListener extends NotificationListenerService {
                     // 存进待确认表，由界面向用户问清楚——绝不直接写进账本。
                     if (!db.pendingSeen(nkey)) {
                         db.insertPending(nkey, bill.amount, bill.channel, bill.title);
-                        Log.i(TAG, "待确认转账：" + bill.channel + " " + bill.title
-                                + " amount=" + bill.amount);
+                        Log.i(TAG, "收到待确认转账通知");
                         pendingAdded = true;
                     }
                 } else if (bill != null) {
@@ -205,13 +204,13 @@ public class NotiListener extends NotificationListenerService {
                         recorded = id > 0;
                         if (recorded) {
                             newId = id;
-                            Log.i(TAG, "已记账 #" + id + " " + bill.channel + " " + bill.amount + " " + bill.title);
+                            Log.i(TAG, "通知记账成功");
                             // 只有支出才可能触发预算预警，收入不会
                             if (bill.amount < 0) {
                                 spentAfter = db.monthTotals(Budget.monthStart())[1];
                             }
                         } else {
-                            Log.e(TAG, "写库失败，未记账：" + bill.channel + " " + bill.amount);
+                            Log.e(TAG, "通知写库失败，未记账");
                             mark("写库失败", bill.channel + " " + bill.amount + " ｜" + bill.title);
                         }
                     }

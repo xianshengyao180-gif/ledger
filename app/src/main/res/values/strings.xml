@@ -8,22 +8,19 @@
     <string name="raw_noti">原始通知</string>
     <string name="pie">用途占比</string>
     <string name="open_autostart">自启动设置</string>
-
     <string name="budget_not_set">点此设置月度预算 ›</string>
     <string name="budget_amount_label">月度预算（元）</string>
     <string name="budget_amount_hint">例如 2000</string>
     <string name="budget_threshold_label">预警阈值（%）</string>
     <string name="budget_threshold_hint">例如 80</string>
     <string name="budget_threshold_note">花到预算的这个比例时提醒一次；填 0 则只在超支时提醒</string>
-
     <string name="pick_category">这笔钱用在哪？</string>
     <string name="skip_category">暂不选择</string>
     <string name="clear_category">清除用途</string>
     <string name="tab_expense">支出</string>
     <string name="tab_income">收入</string>
     <string name="pie_no_data">本月还没有数据</string>
-    <string name="uncategorized_banner">有 %1$d 笔还没选用途，点此补上 ›</string>
-
+    <string name="uncategorized_banner">%1$d 笔账单待分类，点此整理 ›</string>
     <string name="transfer_title">检测到一笔转账</string>
     <string name="transfer_note">微信只在聊天里更新状态，通知里不带金额。请核对后填写。\n\n没收到或已退回的，直接选「忽略这笔」。</string>
     <string name="transfer_amount_label">转账金额（元）</string>
@@ -32,12 +29,9 @@
     <string name="transfer_as_income">我收到的</string>
     <string name="transfer_confirm">确认记账</string>
     <string name="transfer_ignore">忽略这笔</string>
-    <string name="pending_banner">有 %1$d 笔转账待确认，点此处理 ›</string>
-
+    <string name="pending_banner">%1$d 笔转账待确认，点此核对 ›</string>
     <string name="dark_mode">深色</string>
     <string name="light_mode">浅色</string>
-
-    <!-- 手动记一笔 -->
     <string name="add_bill">记一笔</string>
     <string name="add_title">记一笔</string>
     <string name="add_amount_hint">0.00</string>
@@ -49,4 +43,45 @@
     <string name="add_bad_amount">金额格式不对</string>
     <string name="add_zero_amount">金额要大于 0</string>
     <string name="add_saved">已记一笔</string>
+    <string name="home_tagline">把日子，过得有数</string>
+    <string name="ledger_tab">明细</string>
+    <string name="stats_tab">统计</string>
+    <string name="select_all">全选</string>
+    <string name="delete">删除</string>
+    <string name="settings_title">记账设置</string>
+    <string name="local_data_note">自动记账，数据只保存在手机本地。</string>
+    <string name="budget_title">月度预算</string>
+    <string name="import_bill">导入微信账单</string>
+    <string name="previous_month">上一个月</string>
+    <string name="next_month">下一个月</string>
+    <string name="budget_hero_note">这个月，花得有数</string>
+    <string name="month_expense">本月支出</string>
+    <string name="month_income">本月收入</string>
+    <string name="month_net">本月结余</string>
+    <string name="bill_details">收支明细</string>
+    <string name="budget_remaining">本月还可以花</string>
+    <string name="budget_exceeded">本月已超支</string>
+    <string name="budget_unset_title">给支出留个额度</string>
+    <string name="budget_unset_value">设置预算</string>
+    <string name="budget_unset_note">点击设置月度额度</string>
+    <string name="budget_used">已用 %1$.1f%%</string>
+    <string name="budget_total">总预算 ¥%1$,.2f</string>
+    <string name="budget_daily">日均 ¥%1$,.2f</string>
+    <string name="budget_history_note">历史月份</string>
+    <string name="budget_no_limit">未设置预算</string>
+    <string name="budget_adjust">点击调整预算</string>
+    <string name="bill_count">%1$d 笔记录 · 长按可多选</string>
+    <string name="listening_active">自动记账中</string>
+    <string name="listening_attention">检查后台</string>
+    <string name="listening_permission">待授权</string>
+    <string name="back">返回</string>
+    <string name="stats_heading">用途统计</string>
+    <string name="stats_subtitle">每一笔开销，都有去处</string>
+    <string name="save_complete">已保存，账本已更新</string>
+    <string name="category_title">用途分类</string>
+    <string name="manual_source">手动记账 · 保存到本地账本</string>
+    <string name="budget_help">设置总预算与分类额度，接近额度时及时提醒。</string>
+    <string name="budget_disabled">未设置月度预算</string>
+    <string name="budget_a11y">%1$s，%2$s，预算已用 %3$.1f%%，点击调整预算</string>
+    <string name="budget_reference">当前额度 ¥%1$,.2f</string>
 </resources>

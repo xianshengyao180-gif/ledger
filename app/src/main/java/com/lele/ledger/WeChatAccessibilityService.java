@@ -114,7 +114,7 @@ public final class WeChatAccessibilityService extends AccessibilityService {
             String allText = collectText(source);
             if (allText.isEmpty()) return;
 
-            Log.d(TAG, "微信界面文本: " + allText);
+            Log.d(TAG, "已读取微信界面事件");
 
             // 先确认是详情页：必须有"已被接收"或"已被领取"等确认文字
             if (!RECEIVED_PATTERN.matcher(allText).find()) return;
@@ -139,7 +139,7 @@ public final class WeChatAccessibilityService extends AccessibilityService {
 
             // 去重检查：同一金额 2 秒内不再记
             if (Math.abs(amount - lastAmount) < 0.01 && (now - lastEventTs) < DEDUPE_WINDOW_MS) {
-                Log.d(TAG, "去重跳过: " + amount + " " + who);
+                Log.d(TAG, "重复无障碍事件，跳过");
                 return;
             }
             lastAmount = amount;
@@ -153,20 +153,20 @@ public final class WeChatAccessibilityService extends AccessibilityService {
             try {
                 // 先查数据库去重：5 分钟内同一 nkey 不再记
                 if (db.seenKey(nkey, 300_000L)) {
-                    Log.d(TAG, "数据库去重跳过: " + amount);
+                    Log.d(TAG, "数据库已存在此事件，跳过");
                     return;
                 }
 
                 String title = who.isEmpty() ? "转账/红包" : who;
                 long id = db.insert(amount, CHANNEL, title, System.currentTimeMillis(), nkey);
                 if (id > 0) {
-                    Log.i(TAG, "无障碍记账成功 #" + id + " ￥" + amount + " " + who);
+                    Log.i(TAG, "无障碍记账成功");
                     // 广播通知界面刷新
                     sendRefreshBroadcast();
                     // 发待分类通知（和通知监听器的逻辑保持一致）
                     BillNotify.refresh(getApplicationContext(), db);
                 } else {
-                    Log.e(TAG, "无障碍写库失败，未记账: ￥" + amount);
+                    Log.e(TAG, "无障碍写库失败，未记账");
                 }
             } finally {
                 db.close();

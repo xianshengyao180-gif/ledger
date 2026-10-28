@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
-
-    <!-- 滑动后露出的删除按钮 -->
     <TextView
         android:id="@+id/btn_delete"
         android:layout_width="80dp"
@@ -16,8 +16,6 @@
         android:textStyle="bold"
         android:visibility="gone"
         android:layout_gravity="end|center_vertical" />
-
-    <!-- 滑动主体（原有内容） -->
     <LinearLayout
         android:id="@+id/swipe_content"
         android:layout_width="match_parent"
@@ -25,30 +23,24 @@
         android:background="@drawable/bg_item"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         android:paddingTop="13dp"
-        android:paddingBottom="13dp">
-
-        <!-- 渠道徽标：一个圆形色块，比纯文字更一眼可辨 -->
-        <TextView
+        android:paddingBottom="13dp"
+        android:minHeight="76dp">
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/tvBadge"
-            android:layout_width="34dp"
-            android:layout_height="34dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="@drawable/bg_badge"
-            android:gravity="center"
-            android:includeFontPadding="false"
-            android:textColor="#FFFFFFFF"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
+            android:padding="10dp"
+            android:importantForAccessibility="no" />
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_weight="1"
             android:orientation="vertical">
-
             <TextView
                 android:id="@+id/tvTitle"
                 android:layout_width="match_parent"
@@ -56,8 +48,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/text_primary"
-                android:textSize="15sp" />
-
+                android:textSize="14sp" />
             <TextView
                 android:id="@+id/tvSub"
                 android:layout_width="match_parent"
@@ -66,20 +57,22 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
         </LinearLayout>
-
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tvAmount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="100dp"
+            android:layout_height="38dp"
             android:layout_marginStart="10dp"
-            android:gravity="end"
+            android:gravity="end|center_vertical"
             android:includeFontPadding="false"
             android:textSize="17sp"
-            android:textStyle="bold" />
-
-        <!-- 多选勾选框 -->
+            android:maxLines="1"
+            android:fontFamily="sans-serif-medium"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeMaxTextSize="17sp"
+            app:autoSizeStepGranularity="1sp" />
         <CheckBox
             android:id="@+id/cb_check"
             android:layout_width="wrap_content"
@@ -87,7 +80,5 @@
             android:layout_marginStart="8dp"
             android:visibility="gone"
             android:buttonTint="@color/accent" />
-
     </LinearLayout>
-
 </FrameLayout>

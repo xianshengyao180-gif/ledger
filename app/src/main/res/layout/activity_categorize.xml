@@ -4,10 +4,12 @@
     android:layout_height="match_parent"
     android:background="@color/bg"
     android:orientation="vertical"
-    android:paddingStart="14dp"
-    android:paddingEnd="14dp"
-    android:paddingTop="14dp"
-    android:paddingBottom="14dp">
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="18dp"
+    android:paddingBottom="20dp">
+
+    <include layout="@layout/view_page_header" />
 
     <!-- 这一笔的样子：金额放大，渠道和时间在下面 -->
     <LinearLayout
@@ -21,7 +23,7 @@
             android:id="@+id/tvKind"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#CCFFFFFF"
+            android:textColor="@color/hero_muted"
             android:textSize="12sp" />
 
         <TextView
@@ -30,7 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:includeFontPadding="false"
-            android:textColor="@color/on_accent"
+            android:textColor="@color/hero_text"
             android:textSize="32sp"
             android:textStyle="bold" />
 
@@ -40,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:alpha="0.85"
-            android:textColor="@color/on_accent"
+            android:textColor="@color/hero_text"
             android:textSize="12sp" />
     </LinearLayout>
 

@@ -1,6 +1,6 @@
 package com.lele.ledger;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;

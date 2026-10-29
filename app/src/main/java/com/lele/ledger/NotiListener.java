@@ -166,8 +166,6 @@ public class NotiListener extends NotificationListenerService {
             // 记完这笔之后的本月支出。预算预警要用它，而 db 在 finally 里就关了，
             // 所以必须在关之前算出来带出去。
             double spentAfter = -1;
-            // 这笔的 id，用来让「待分类」提醒直接跳到它
-            long newId = -1;
             // 有没有新塞进一条待确认转账
             boolean pendingAdded = false;
             Db db = new Db(getApplicationContext());
@@ -203,7 +201,6 @@ public class NotiListener extends NotificationListenerService {
                         // 否则界面会白刷一下、日志会假报成功，反而掩盖了故障。
                         recorded = id > 0;
                         if (recorded) {
-                            newId = id;
                             Log.i(TAG, "通知记账成功");
                             // 只有支出才可能触发预算预警，收入不会
                             if (bill.amount < 0) {
@@ -229,20 +226,11 @@ public class NotiListener extends NotificationListenerService {
                 if (spentAfter >= 0) {
                     Budget.checkAndAlert(getApplicationContext(), spentAfter);
                 }
-                // 提醒用户给这笔选个用途。同样放在最后，失败不影响记账。
-                if (newId > 0) {
-                    Db d2 = new Db(getApplicationContext());
-                    try {
-                        BillNotify.refresh(getApplicationContext(), d2);
-                    } finally {
-                        d2.close();
-                    }
-                }
             } else if (pendingAdded) {
-                // 转账待确认：同样出一条可点的提醒
+                // 仅新的待确认转账发送可点击的核对提醒。
                 Db d2 = new Db(getApplicationContext());
                 try {
-                    BillNotify.refresh(getApplicationContext(), d2);
+                    BillNotify.notifyPendingTransfer(getApplicationContext(), d2);
                 } finally {
                     d2.close();
                 }

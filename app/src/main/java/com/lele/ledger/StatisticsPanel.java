@@ -2,11 +2,13 @@ package com.lele.ledger;
 
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
+import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -27,6 +29,7 @@ final class StatisticsPanel {
     private final View root;
     private List<Bill> bills = Collections.emptyList();
     private PieChartView pie;
+    private long monthStart = Long.MIN_VALUE;
     private LinearLayout boxLegend;
     private TextView tvNoData;
     private TextView tvHint;
@@ -52,7 +55,8 @@ final class StatisticsPanel {
         btnExpense.setOnClickListener(v -> select(false));
         btnIncome.setOnClickListener(v -> select(true));
 
-        select(income);
+        updateDirection();
+        render();
     }
 
     void saveState(Bundle outState) {
@@ -60,6 +64,8 @@ final class StatisticsPanel {
     }
 
     void refresh(long monthStart, List<Bill> bills, boolean hasNextMonth) {
+        boolean changedMonth = this.monthStart != Long.MIN_VALUE && this.monthStart != monthStart;
+        this.monthStart = monthStart;
         this.bills = bills;
         Calendar month = Calendar.getInstance();
         month.setTimeInMillis(monthStart);
@@ -68,11 +74,17 @@ final class StatisticsPanel {
         View nextMonth = root.findViewById(R.id.btnStatsNextMonth);
         nextMonth.setEnabled(hasNextMonth);
         nextMonth.setAlpha(hasNextMonth ? 0.5f : 0.15f);
-        render();
+        renderData(changedMonth);
     }
 
     private void select(boolean wantIncome) {
+        if (income == wantIncome) return;
         income = wantIncome;
+        updateDirection();
+        renderData(true);
+    }
+
+    private void updateDirection() {
         btnExpense.setBackgroundResource(income ? R.drawable.bg_pill : R.drawable.bg_pill_accent);
         btnExpense.setTextColor(ContextCompat.getColor(context,
                 income ? R.color.text_secondary : R.color.on_accent));
@@ -81,8 +93,32 @@ final class StatisticsPanel {
                 income ? R.color.on_accent : R.color.text_secondary));
         btnExpense.setSelected(!income);
         btnIncome.setSelected(income);
+    }
 
+    void onShown() {
+        pie.post(pie::animateEntranceIfNeeded);
+    }
+
+    void finishTransition() {
+        boxLegend.animate().cancel();
+        boxLegend.setAlpha(1f);
+        boxLegend.setTranslationY(0f);
+        pie.finishAnimation();
+    }
+
+    private void renderData(boolean animate) {
+        boxLegend.animate().cancel();
         render();
+        if (animate && boxLegend.isShown() && boxLegend.isLaidOut()
+                && ValueAnimator.areAnimatorsEnabled()) {
+            boxLegend.setAlpha(0.35f);
+            boxLegend.setTranslationY(dp(5));
+            boxLegend.animate().alpha(1f).translationY(0f).setStartDelay(0).setDuration(220)
+                    .setInterpolator(new DecelerateInterpolator()).start();
+        } else {
+            boxLegend.setAlpha(1f);
+            boxLegend.setTranslationY(0f);
+        }
     }
 
     private void render() {
@@ -105,10 +141,9 @@ final class StatisticsPanel {
             }
         }
         slices.sort((left, right) -> Double.compare(right.value, left.value));
-        selectedLabel = null;
-
-        pie.setSlices(slices, income ? "收入合计" : "支出合计",
+        boolean changed = pie.setSlices(slices, income ? "收入合计" : "支出合计",
                 String.format(Locale.CHINA, "¥%,.2f", total));
+        if (changed) selectedLabel = null;
 
         boxLegend.removeAllViews();
         for (PieChartView.Slice s : slices) {
@@ -144,6 +179,9 @@ final class StatisticsPanel {
             }
         });
         row.setTag(s.label);
+        boolean selected = s.label.equals(selectedLabel);
+        row.setSelected(selected);
+        row.setBackgroundResource(selected ? R.drawable.bg_pill : android.R.color.transparent);
         LinearLayout.LayoutParams rlp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         rlp.topMargin = dp(8);

@@ -45,6 +45,8 @@ public class TransferActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transfer);
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        ((TextView) findViewById(R.id.tvHeader)).setText("确认转账");
 
         db = new Db(this);
         pendingId = getIntent().getLongExtra(EXTRA_ID, -1L);
@@ -127,7 +129,8 @@ public class TransferActivity extends AppCompatActivity {
 
     /** 还有待确认的就接着问下一笔，没有就关页。 */
     private void nextOrFinish() {
-        BillNotify.refresh(this, db);
+        // 用户正在处理转账队列，撤回提醒，不重复弹出剩余笔数。
+        BillNotify.cancel(this);
         Bill next = db.nextPending();
         if (next == null) {
             finish();

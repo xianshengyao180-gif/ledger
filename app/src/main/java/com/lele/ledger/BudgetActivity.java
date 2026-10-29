@@ -1,6 +1,6 @@
 package com.lele.ledger;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.Editable;

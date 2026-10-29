@@ -24,6 +24,7 @@ public final class BootReceiver extends BroadcastReceiver {
                 || Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)
                 || "android.intent.action.QUICKBOOT_POWERON".equals(action)
                 || "com.htc.intent.action.QUICKBOOT_POWERON".equals(action)) {
+            BillNotify.clearCategoryReminder(context);
             KeepAliveService.start(context);
         }
     }

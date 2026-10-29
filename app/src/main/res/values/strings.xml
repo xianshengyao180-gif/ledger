@@ -3,7 +3,11 @@
     <string name="app_name">极简记账</string>
     <string name="no_bills">还没有记录\n付款后会自动出现\n（点这里可看收到的原始通知）</string>
     <string name="open_listener">通知使用权</string>
-    <string name="accessibility_service_desc">监听微信聊天界面，自动记录转账/红包入账</string>
+    <string name="accessibility_service_desc">在本地读取已完成的微信红包和转账详情。允许本地文字识别后，可读取详情窗口图像。结果核对后入账，不保存截图，不上传。</string>
+    <string name="wechat_reader_service_name">微信红包与转账读取</string>
+    <string name="wechat_reader_enabled">红包与转账读取 · 已开启</string>
+    <string name="wechat_receipt_pending">微信详情 · %1$d 笔待核对，点击查看</string>
+    <string name="wechat_reader_disabled">红包与转账读取 · 未开启</string>
     <string name="open_battery">电池优化</string>
     <string name="raw_noti">原始通知</string>
     <string name="pie">用途占比</string>

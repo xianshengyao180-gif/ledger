@@ -11,27 +11,42 @@
         android:layout_height="wrap_content"
         android:padding="20dp"
         android:orientation="vertical">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
-            <ImageButton
-                android:id="@+id/btnBack"
-                style="@style/Ledger.IconButton"
-                android:src="@drawable/ic_chevron_left"
-                android:contentDescription="@string/back" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical">
             <TextView
+                android:id="@+id/tvStatsMonth"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/stats_heading"
                 android:textColor="@color/text_primary"
-                android:textSize="22sp"
+                android:textSize="16sp"
                 android:textStyle="bold" />
-            <TextView
-                android:id="@+id/tvStatsMonth"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp" />
+            <ImageButton
+                android:id="@+id/btnStatsPrevMonth"
+                style="@style/Ledger.IconButton"
+                android:src="@drawable/ic_chevron_left"
+                android:contentDescription="@string/previous_month" />
+            <ImageButton
+                android:id="@+id/btnStatsNextMonth"
+                style="@style/Ledger.IconButton"
+                android:src="@drawable/ic_chevron_right"
+                android:contentDescription="@string/next_month" />
+            <ImageButton
+                android:id="@+id/btnStatsSettings"
+                style="@style/Ledger.IconButton"
+                android:src="@drawable/ic_settings"
+                android:contentDescription="@string/settings_title" />
         </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="@string/stats_heading"
+            android:textColor="@color/text_primary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

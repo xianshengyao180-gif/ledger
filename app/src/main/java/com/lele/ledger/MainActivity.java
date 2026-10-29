@@ -8,6 +8,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.TextViewCompat;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -47,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
 
     private Db db;
     private BillAdapter adapter;
+    private View statisticsView;
+    private StatisticsPanel statisticsPanel;
+    private boolean statisticsVisible;
     private TextView tvExpense;
     private TextView tvIncome;
     private TextView tvNet;
@@ -132,6 +137,22 @@ public class MainActivity extends AppCompatActivity {
                 .getBoolean("dark_mode", false) ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState != null) {
+            monthOffset = savedInstanceState.getInt("month_offset", 0);
+            statisticsVisible = savedInstanceState.getBoolean("statistics_visible", false);
+        }
+        statisticsView = findViewById(R.id.statisticsPanel);
+        statisticsPanel = new StatisticsPanel(statisticsView, savedInstanceState);
+        statisticsView.findViewById(R.id.btnStatsPrevMonth).setOnClickListener(v -> {
+            monthOffset--;
+            refresh();
+        });
+        statisticsView.findViewById(R.id.btnStatsNextMonth).setOnClickListener(v -> {
+            if (monthOffset < 0) {
+                monthOffset++;
+                refresh();
+            }
+        });
 
         ListView list = findViewById(R.id.lvBills);
         View header = getLayoutInflater().inflate(R.layout.view_ledger_header, list, false);
@@ -280,9 +301,15 @@ public class MainActivity extends AppCompatActivity {
         // 阻止卡片区域的点击穿透
         confirmOverlay.findViewById(R.id.confirmCard).setOnClickListener(null);
 
-        findViewById(R.id.btnLedger).setOnClickListener(v -> list.smoothScrollToPosition(0));
-        findViewById(R.id.btnPie).setOnClickListener(v ->
-                startActivity(new Intent(this, PieActivity.class).putExtra("month_start", offsetMonthStart())));
+        findViewById(R.id.btnLedger).setOnClickListener(v -> {
+            if (statisticsVisible) {
+                showStatistics(false);
+            } else {
+                list.smoothScrollToPosition(0);
+            }
+        });
+        findViewById(R.id.btnPie).setOnClickListener(v -> showStatistics(true));
+        showStatistics(statisticsVisible);
         findViewById(R.id.btnBudgetSettings).setOnClickListener(v -> showBudgetDialog());
         // 待分类横幅：点进去显示所有未分类记录列表，跟主界面一样可滑动/点选
         banner.setOnClickListener(v ->
@@ -315,6 +342,7 @@ public class MainActivity extends AppCompatActivity {
         // btnDrawer 入口已统一到 btnDrawerHero
         // 英雄卡右上角齿轮也绑定同一切换
         header.findViewById(R.id.btnDrawerHero).setOnClickListener(toggleDrawerListener);
+        statisticsView.findViewById(R.id.btnStatsSettings).setOnClickListener(toggleDrawerListener);
         // 点击遮罩关闭抽屉
         drawerOverlay.setOnClickListener(v -> closeDrawer(drawerOverlay, drawerPanel));
         // 阻止面板区域点击穿透（点面板本身不关闭）
@@ -360,6 +388,30 @@ public class MainActivity extends AppCompatActivity {
 
         // 账单文件只通过导入入口或系统文件分享读取。
 
+    }
+
+    private void showStatistics(boolean show) {
+        if (show && adapter.isMultiSelectMode()) exitMultiSelect();
+        statisticsVisible = show;
+        findViewById(R.id.lvBills).setVisibility(show ? View.GONE : View.VISIBLE);
+        statisticsView.setVisibility(show ? View.VISIBLE : View.GONE);
+        updateNavigation(findViewById(R.id.btnLedger), !show);
+        updateNavigation(findViewById(R.id.btnPie), show);
+    }
+
+    private void updateNavigation(TextView button, boolean selected) {
+        int color = getColorCompat(selected ? R.color.accent : R.color.text_secondary);
+        button.setSelected(selected);
+        button.setTextColor(color);
+        TextViewCompat.setCompoundDrawableTintList(button, ColorStateList.valueOf(color));
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("month_offset", monthOffset);
+        outState.putBoolean("statistics_visible", statisticsVisible);
+        statisticsPanel.saveState(outState);
+        super.onSaveInstanceState(outState);
     }
 
     /** 点某条记录 → 弹出编辑卡片修改金额/用途。 */
@@ -680,6 +732,7 @@ public class MainActivity extends AppCompatActivity {
         // 查偏移月的账单
         List<Bill> bills = db.recentInMonth(start);
         adapter.setItems(bills);
+        statisticsPanel.refresh(start, bills, monthOffset < 0);
         tvEmpty.setVisibility(bills.isEmpty() ? View.VISIBLE : View.GONE);
         tvListHint.setText(getString(R.string.bill_count, bills.size()));
 
@@ -750,6 +803,10 @@ public class MainActivity extends AppCompatActivity {
         }
         if (adapter.isMultiSelectMode()) {
             exitMultiSelect();
+            return;
+        }
+        if (statisticsVisible) {
+            showStatistics(false);
             return;
         }
         super.onBackPressed();

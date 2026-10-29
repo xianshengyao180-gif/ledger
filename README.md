@@ -1,6 +1,10 @@
 # 极简记账
 
-> 版本 2.3.1 · 包名 `com.lele.ledger` · Android 应用
+> 版本 2.3.2 · 包名 `com.lele.ledger` · Android 应用
+
+### 2.3.2：主页内切换统计
+
+点击底部「统计」后，在主页面内容区显示用途统计，底部导航和「记一笔」入口保留。明细与统计共用所选月份，切回明细时保留列表滚动位置。统计内可切换月份、收入和支出，也可打开设置。返回键先回到明细；主题切换或界面重建后恢复所选月份、页面和统计方向。
 
 ### 2.3.1：发布内容清理
 
@@ -265,7 +269,7 @@ Weixin Pay
 | `CategorizeActivity.java` | 单条记录快速选用途 |
 | `UncategorizedBulkActivity.java` | 未分类记录列表，批量定用途 |
 | `PieChartView.java` | 纯自绘饼图控件 |
-| `PieActivity.java` | 收支占比饼图页 |
+| `StatisticsPanel.java` | 主页内收支用途统计面板 |
 | `Budget.java` | 月度预算 + 分类预算 + 预警通知 |
 | `BudgetActivity.java` | 预算设置页 |
 | `KeepAliveService.java` | 常驻前台服务（保活核心） |

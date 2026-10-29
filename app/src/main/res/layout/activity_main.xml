@@ -82,18 +82,28 @@
             <TextView android:id="@+id/btnMultiSelectAll" style="@style/Ledger.MultiAction" android:text="@string/select_all" />
             <TextView android:id="@+id/btnMultiDelete" style="@style/Ledger.MultiAction" android:text="@string/delete" />
         </LinearLayout>
-        <ListView
-            android:id="@+id/lvBills"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="12dp"
-            android:clipToPadding="false"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="8dp"
-            android:scrollbars="none" />
+            android:layout_weight="1">
+            <ListView
+                android:id="@+id/lvBills"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="12dp"
+                android:clipToPadding="false"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="8dp"
+                android:scrollbars="none" />
+            <include
+                android:id="@+id/statisticsPanel"
+                layout="@layout/view_statistics"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+        </FrameLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

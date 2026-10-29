@@ -47,11 +47,6 @@
             android:exported="false"
             android:launchMode="singleTop" />
 
-        <activity
-            android:name=".PieActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
-
         <!-- 转账「已被接收」的确认页。从提醒点进来，也可从主界面横幅进 -->
         <activity
             android:name=".TransferActivity"

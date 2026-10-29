@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingBottom="16dp">
+    <ImageButton
+        android:id="@+id/btnBack"
+        style="@style/Ledger.IconButton"
+        android:src="@drawable/ic_chevron_left"
+        android:contentDescription="@string/back" />
+    <TextView
+        android:id="@+id/tvHeader"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:fontFamily="serif"
+        android:textSize="25sp"
+        android:textColor="@color/text_primary"
+        android:text="@string/category_title" />
+</LinearLayout>

@@ -12,8 +12,8 @@ android {
         targetSdk 34
         // v17: 修待确认转账入库后界面不实时刷新（notifyUi 被早退跳过）
         // v18: 新增「记一笔」手动记账入口
-        versionCode 24
-        versionName "2.3.1"
+        versionCode 35
+        versionName "2.3.3-reader-preview.6"
     }
 
     buildFeatures {
@@ -42,6 +42,9 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    // Bundled Chinese model: receipt images stay on the device; no model download at runtime.
+    implementation 'com.google.mlkit:text-recognition-chinese:16.0.1'
+    testImplementation 'junit:junit:4.13.2'
 
     // Apache POI：解析微信导出的 xlsx 账单
     implementation 'org.apache.poi:poi:5.2.5'

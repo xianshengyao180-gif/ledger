@@ -183,6 +183,7 @@
                 android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
+    <TextView android:id="@+id/bannerReceipt" style="@style/Ledger.PendingNote" android:drawableStart="@drawable/ic_wallet" />
     <TextView android:id="@+id/bannerTransfer" style="@style/Ledger.PendingNote" android:drawableStart="@drawable/ic_alert" />
     <TextView android:id="@+id/banner" style="@style/Ledger.PendingNote" android:drawableStart="@drawable/ic_tag" />
     <LinearLayout

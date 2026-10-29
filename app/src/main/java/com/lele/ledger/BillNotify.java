@@ -1,33 +1,22 @@
 package com.lele.ledger;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
 
-import java.util.Locale;
-
-/**
- * 「记了一笔，选个用途」的提醒。
- *
- * 为什么用横幅通知而不是直接弹悬浮窗：Android 10 起后台应用不允许直接弹出 Activity，
- * 想盖在别的应用上得申请「悬浮窗」权限。而高重要级通知会以横幅落到屏幕顶端、
- * 点一下就是分类页——不需要额外权限，也不会因为没授权就静默什么都不发生。
- *
- * 只占一个通知位（NOTI_ID 固定）：连续记几笔时不会堆出一排通知，
- * 而是同一张卡片不断更新，文案里带上「还有 N 笔待分类」。
- */
+/** 仅在收到新的待确认转账时发送系统提醒，普通账单分类留在应用内处理。 */
 public final class BillNotify {
 
     private static final String TAG = "Ledger";
-    // 渠道一旦创建，除了名称和描述，振动/重要性都归用户所有，App 再也改不动。
-    // 旧渠道 categorize 建的时候没带振动，怎么改代码都改不动它（实测踩过）。
-    // 所以换个新 id，用新渠道把振动带上。
+    // 沿用渠道 ID，保留用户已设置的重要性、声音和振动偏好。
     private static final String CH_ID = "categorize_v2";
     private static final int NOTI_ID = 3000;
 
@@ -41,9 +30,10 @@ public final class BillNotify {
     private BillNotify() {
     }
 
-    /** 按当前「待确认转账 / 待分类」的数量决定发通知还是撤通知。 */
-    public static void refresh(Context ctx, Db db) {
+    /** 只有新的待确认转账事件可以触发此入口。 */
+    public static void notifyPendingTransfer(Context ctx, Db db) {
         try {
+            clearCategoryReminder(ctx);
             // 待确认的转账优先：它金额都还没定，不处理就永远记不上。
             Bill pendingTransfer = db.nextPending();
             int pendingCount = db.countPending();
@@ -58,21 +48,9 @@ public final class BillNotify {
                 return;
             }
 
-            Bill b = db.nextUncategorized();
-            if (b == null) {
-                cancel(ctx);
-                return;
-            }
-            int count = db.countUncategorized();
-            String amount = String.format(Locale.CHINA, "%s¥%.2f",
-                    b.amount >= 0 ? "+" : "-", Math.abs(b.amount));
-            String title = b.amount >= 0 ? "记了一笔收入" : "记了一笔支出";
-            String text = amount + " · " + b.channel
-                    + (count > 1 ? "（还有 " + count + " 笔待分类）" : "")
-                    + "　点此选择用途";
-            notify(ctx, title, text, CategorizeActivity.class, b.id);
+            cancel(ctx);
         } catch (Throwable t) {
-            Log.e(TAG, "待分类提醒发送失败", t);
+            Log.e(TAG, "转账待确认提醒发送失败", t);
         }
     }
 
@@ -84,14 +62,15 @@ public final class BillNotify {
         if (nm == null) {
             return;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                && nm.getNotificationChannel(CH_ID) == null) {
-            NotificationChannel ch = new NotificationChannel(
-                    CH_ID, "待分类提醒", NotificationManager.IMPORTANCE_HIGH);
-            ch.setDescription("检测到收付款后提醒你选择用途");
-            // 横幅只飘三秒左右，配一段短振动让它能被注意到。
-            ch.enableVibration(true);
-            ch.setVibrationPattern(new long[]{0, 250, 150, 250});
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel ch = nm.getNotificationChannel(CH_ID);
+            if (ch == null) {
+                ch = new NotificationChannel(CH_ID, "转账待确认", NotificationManager.IMPORTANCE_HIGH);
+                ch.enableVibration(true);
+                ch.setVibrationPattern(new long[]{0, 250, 150, 250});
+            }
+            ch.setName("转账待确认");
+            ch.setDescription("收到需要核对金额的转账时提醒");
             nm.createNotificationChannel(ch);
         }
 
@@ -115,6 +94,7 @@ public final class BillNotify {
                 .setContentText(text)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                 .setAutoCancel(true)
+                .setOnlyAlertOnce(true)
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setVibrate(new long[]{0, 250, 150, 250})
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
@@ -122,6 +102,24 @@ public final class BillNotify {
             nb.setContentIntent(pi);
         }
         nm.notify(NOTI_ID, nb.build());
+    }
+
+    /** 更新或打开应用时，仅撤回旧版遗留的待分类通知。 */
+    public static void clearCategoryReminder(Context ctx) {
+        try {
+            NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm == null) return;
+            for (StatusBarNotification notice : nm.getActiveNotifications()) {
+                if (notice.getId() != NOTI_ID) continue;
+                CharSequence title = notice.getNotification().extras.getCharSequence(Notification.EXTRA_TITLE);
+                if ("记了一笔收入".contentEquals(title == null ? "" : title)
+                        || "记了一笔支出".contentEquals(title == null ? "" : title)) {
+                    nm.cancel(NOTI_ID);
+                }
+            }
+        } catch (Throwable ignored) {
+            // 撤回旧提醒失败不会影响记账。
+        }
     }
 
     public static void cancel(Context ctx) {

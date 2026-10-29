@@ -1,6 +1,6 @@
 package com.lele.ledger;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -47,6 +47,11 @@ public class MainActivity extends AppCompatActivity {
 
     private Db db;
     private BillAdapter adapter;
+    private View statisticsView;
+    private CircularPageLayout pageContent;
+    private AnimatedTabBar tabBar;
+    private StatisticsPanel statisticsPanel;
+    private boolean statisticsVisible;
     private TextView tvExpense;
     private TextView tvIncome;
     private TextView tvNet;
@@ -61,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvBudgetTitle, tvBudgetRemaining, tvBudgetTotal;
     private TextView banner;
     private TextView bannerTransfer;
+    private TextView bannerReceipt;
 
     /** 多选操作栏 */
     private View multiBar;
@@ -132,6 +138,26 @@ public class MainActivity extends AppCompatActivity {
                 .getBoolean("dark_mode", false) ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        BillNotify.clearCategoryReminder(this);
+        pageContent = findViewById(R.id.pageContent);
+        tabBar = findViewById(R.id.tabBar);
+        pageContent.setProgressListener(tabBar::setProgress);
+        if (savedInstanceState != null) {
+            monthOffset = savedInstanceState.getInt("month_offset", 0);
+            statisticsVisible = savedInstanceState.getBoolean("statistics_visible", false);
+        }
+        statisticsView = findViewById(R.id.statisticsPanel);
+        statisticsPanel = new StatisticsPanel(statisticsView, savedInstanceState);
+        statisticsView.findViewById(R.id.btnStatsPrevMonth).setOnClickListener(v -> {
+            monthOffset--;
+            refresh();
+        });
+        statisticsView.findViewById(R.id.btnStatsNextMonth).setOnClickListener(v -> {
+            if (monthOffset < 0) {
+                monthOffset++;
+                refresh();
+            }
+        });
 
         ListView list = findViewById(R.id.lvBills);
         View header = getLayoutInflater().inflate(R.layout.view_ledger_header, list, false);
@@ -159,6 +185,8 @@ public class MainActivity extends AppCompatActivity {
         // 下拉刷新已去除
         banner = header.findViewById(R.id.banner);
         bannerTransfer = header.findViewById(R.id.bannerTransfer);
+        bannerReceipt = header.findViewById(R.id.bannerReceipt);
+        bannerReceipt.setOnClickListener(v -> WeChatReceiptReview.show(this, db, this::refresh));
 
         // 预算两处入口：没设时点提示行，设了点进度条本身
         tvBudgetSet.setOnClickListener(v -> showBudgetDialog());
@@ -280,9 +308,15 @@ public class MainActivity extends AppCompatActivity {
         // 阻止卡片区域的点击穿透
         confirmOverlay.findViewById(R.id.confirmCard).setOnClickListener(null);
 
-        findViewById(R.id.btnLedger).setOnClickListener(v -> list.smoothScrollToPosition(0));
-        findViewById(R.id.btnPie).setOnClickListener(v ->
-                startActivity(new Intent(this, PieActivity.class).putExtra("month_start", offsetMonthStart())));
+        findViewById(R.id.btnLedger).setOnClickListener(v -> {
+            if (statisticsVisible) {
+                showStatistics(false);
+            } else {
+                list.smoothScrollToPosition(0);
+            }
+        });
+        findViewById(R.id.btnPie).setOnClickListener(v -> showStatistics(true));
+        showStatistics(statisticsVisible);
         findViewById(R.id.btnBudgetSettings).setOnClickListener(v -> showBudgetDialog());
         // 待分类横幅：点进去显示所有未分类记录列表，跟主界面一样可滑动/点选
         banner.setOnClickListener(v ->
@@ -294,6 +328,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btnImport).setOnClickListener(v ->
                 startActivity(new Intent(this, ImportActivity.class)));
         findViewById(R.id.btnListener).setOnClickListener(v -> openListenerSettings());
+        findViewById(R.id.btnWechatReader).setOnClickListener(v -> openWechatReaderSettings());
         findViewById(R.id.btnBattery).setOnClickListener(v -> requestBatteryExemption());
         findViewById(R.id.btnDebug).setOnClickListener(v -> showRawNotifications());
 
@@ -315,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
         // btnDrawer 入口已统一到 btnDrawerHero
         // 英雄卡右上角齿轮也绑定同一切换
         header.findViewById(R.id.btnDrawerHero).setOnClickListener(toggleDrawerListener);
+        statisticsView.findViewById(R.id.btnStatsSettings).setOnClickListener(toggleDrawerListener);
         // 点击遮罩关闭抽屉
         drawerOverlay.setOnClickListener(v -> closeDrawer(drawerOverlay, drawerPanel));
         // 阻止面板区域点击穿透（点面板本身不关闭）
@@ -354,12 +390,28 @@ public class MainActivity extends AppCompatActivity {
 
         // Android 13+ 需要用户授权才能显示常驻通知（不给授权服务仍能跑，但不显示）
         requestNotiPermissionIfNeeded();
-        // 打开应用时顺手把「待分类」提醒同步成当前真实状态
-        // 注：dark mode toggle 通过 recreate() 进入 onCreate，此处不再额外刷新通知
-        // BillNotify.refresh 仅在保存编辑时调用（saveBillEdit）
+        // 待分类记录只在主页提示，不发送系统催办通知。
 
         // 账单文件只通过导入入口或系统文件分享读取。
 
+    }
+
+    private void showStatistics(boolean show) {
+        if (show && adapter.isMultiSelectMode()) exitMultiSelect();
+        statisticsVisible = show;
+        findViewById(R.id.btnLedger).setSelected(!show);
+        findViewById(R.id.btnPie).setSelected(show);
+        pageContent.showStatistics(show,
+                tabBar.originFor(findViewById(show ? R.id.btnPie : R.id.btnLedger)), true);
+        if (show) statisticsPanel.onShown();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("month_offset", monthOffset);
+        outState.putBoolean("statistics_visible", statisticsVisible);
+        statisticsPanel.saveState(outState);
+        super.onSaveInstanceState(outState);
     }
 
     /** 点某条记录 → 弹出编辑卡片修改金额/用途。 */
@@ -416,7 +468,6 @@ public class MainActivity extends AppCompatActivity {
             Budget.checkTagAndAlert(this, db, cat);
         }
 
-        BillNotify.refresh(this, db);
         hideBillEditor();
         refresh();
         showSaveFeedback();
@@ -613,14 +664,13 @@ public class MainActivity extends AppCompatActivity {
         }
         db.updateCategory(id, cat);
 
-        // 与自动记账同样的后续动作：预算预警 + 刷新待分类提醒
+        // 保存后保留预算预警，待分类记录在主页统一处理。
         if (signed < 0) {
             Budget.checkAndAlert(this, db.monthTotals(Budget.monthStart())[1]);
         }
         if (!cat.isEmpty()) {
             Budget.checkTagAndAlert(this, db, cat);
         }
-        BillNotify.refresh(this, db);
 
         hideAddCard();
         refresh();
@@ -656,6 +706,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+        pageContent.finishTransition();
+        statisticsPanel.finishTransition();
         super.onPause();
         dotAlive.removeCallbacks(refreshAfterStart);
         if (receiverRegistered) {
@@ -680,6 +732,7 @@ public class MainActivity extends AppCompatActivity {
         // 查偏移月的账单
         List<Bill> bills = db.recentInMonth(start);
         adapter.setItems(bills);
+        statisticsPanel.refresh(start, bills, monthOffset < 0);
         tvEmpty.setVisibility(bills.isEmpty() ? View.VISIBLE : View.GONE);
         tvListHint.setText(getString(R.string.bill_count, bills.size()));
 
@@ -724,6 +777,11 @@ public class MainActivity extends AppCompatActivity {
             banner.setVisibility(View.GONE);
         }
 
+        ((TextView) findViewById(R.id.btnWechatReader)).setText(isWechatReaderEnabled()
+                ? R.string.wechat_reader_enabled : R.string.wechat_reader_disabled);
+        int receipts = WeChatReceiptStore.count(db);
+        bannerReceipt.setVisibility(receipts > 0 ? View.VISIBLE : View.GONE);
+        bannerReceipt.setText(getString(R.string.wechat_receipt_pending, receipts));
         refreshAlive(on);
 
         // 多选模式：如果列表已刷新（比如删除后），退出多选
@@ -750,6 +808,10 @@ public class MainActivity extends AppCompatActivity {
         }
         if (adapter.isMultiSelectMode()) {
             exitMultiSelect();
+            return;
+        }
+        if (statisticsVisible) {
+            showStatistics(false);
             return;
         }
         super.onBackPressed();
@@ -1051,6 +1113,55 @@ public class MainActivity extends AppCompatActivity {
 
     private static long monthStart() {
         return Budget.monthStart();
+    }
+
+    private boolean isWechatReaderEnabled() {
+        String enabled = Settings.Secure.getString(getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        if (enabled == null) return false;
+        ComponentName expected = new ComponentName(this, WeChatAccessibilityService.class);
+        for (String value : enabled.split(":")) {
+            if (expected.equals(ComponentName.unflattenFromString(value))) return true;
+        }
+        return false;
+    }
+
+    private void openWechatReaderSettings() {
+        boolean local = WeChatAccessibilityService.hasScreenshotConsent(this);
+        String status = getSharedPreferences(WeChatAccessibilityService.PREFS, MODE_PRIVATE)
+                .getString(WeChatAccessibilityService.STATUS, "开启服务后，重新打开已完成的微信详情");
+        LedgerSheet sheet = new LedgerSheet(this, getString(R.string.wechat_reader_service_name),
+                (isWechatReaderEnabled() ? "辅助功能已开启" : "辅助功能未开启")
+                        + "\n本地文字识别：" + (local ? "已开启" : "未开启") + "\n\n" + status
+                        + "\n\n识别结果只在账本内待核对，不弹通知，不自动入账。");
+        sheet.extra(local ? "停用本地文字识别" : "开启本地文字识别", () -> {
+                    sheet.dismiss();
+                    if (local) {
+                        getSharedPreferences(WeChatAccessibilityService.PREFS, MODE_PRIVATE).edit()
+                                .putBoolean(WeChatAccessibilityService.CONSENT, false).apply();
+                    } else {
+                        LedgerSheet consent = new LedgerSheet(this, "本地识别微信详情",
+                                "微信未提供页面文字时，读取已完成红包或转账的窗口图像，"
+                                        + "在手机本地识别金额和收付款状态。\n\n"
+                                        + "截图只在内存处理，不保存、不上传。聊天和支付密码页面不在读取范围。"
+                                        + "结果需回到账本核对后才能入账。可随时在这里关闭。");
+                        consent.secondary("暂不开启", consent::dismiss)
+                                .primary("同意并开启", () -> {
+                                    getSharedPreferences(WeChatAccessibilityService.PREFS, MODE_PRIVATE).edit()
+                                            .putBoolean(WeChatAccessibilityService.CONSENT, true).apply();
+                                    consent.dismiss();
+                                    Toast.makeText(this, "已开启，请重新打开已完成的微信详情", Toast.LENGTH_LONG).show();
+                                }).show();
+                    }
+                });
+        sheet.secondary("关闭", sheet::dismiss).primary("辅助功能设置", () -> {
+                    sheet.dismiss();
+                    try {
+                        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+                    } catch (Exception error) {
+                        Toast.makeText(this, "请在系统辅助功能中开启微信红包与转账读取", Toast.LENGTH_LONG).show();
+                    }
+                }).show();
     }
 
     private void openListenerSettings() {

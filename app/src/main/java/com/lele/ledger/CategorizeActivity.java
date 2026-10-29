@@ -33,6 +33,8 @@ public class CategorizeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_categorize);
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        ((TextView) findViewById(R.id.tvHeader)).setText(R.string.category_title);
 
         db = new Db(this);
         billId = getIntent().getLongExtra(EXTRA_ID, -1L);
@@ -69,21 +71,18 @@ public class CategorizeActivity extends AppCompatActivity {
     /** 清掉用途，退回「未分类」——选错了得能改回来。 */
     private void clear() {
         db.updateCategory(billId, "");
-        BillNotify.refresh(this, db);
         nextOrFinish();
     }
 
-    /** 选中用途：写库、刷新待分类提醒，然后继续下一笔（没有就关页）。 */
+    /** 选中用途：写库，然后继续下一笔（没有就关页）。 */
     private void pick(String name) {
         db.updateCategory(billId, name);
-        BillNotify.refresh(this, db);
         nextOrFinish();
     }
 
     private void nextOrFinish() {
         Bill next = db.nextUncategorized();
         if (next == null) {
-            BillNotify.cancel(this);
             finish();
             return;
         }

@@ -22,7 +22,7 @@ import java.util.List;
 public final class Db extends SQLiteOpenHelper {
 
     private static final String NAME = "ledger.db";
-    private static final int VERSION = 7;
+    private static final int VERSION = 8;
     private static final int RAW_KEEP = 400;
 
     /**
@@ -50,10 +50,13 @@ public final class Db extends SQLiteOpenHelper {
         db.execSQL("CREATE INDEX idx_bills_ts ON bills(ts DESC)");
         createRawTable(db);
         createPendingTable(db);
+        WeChatReceiptStore.createTable(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
+        // v8: proposals are separate from real bills; existing ledger records stay untouched.
+        if (oldV < 8) WeChatReceiptStore.createTable(db);
         // v1 -> v2：新增原始通知表。不触碰已有的 bills 数据。
         if (oldV < 2) {
             createRawTable(db);

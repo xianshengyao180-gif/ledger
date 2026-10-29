@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <!-- Bundled OCR runs offline. Remove network permissions contributed by SDK dependencies. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
 
     <!-- 常驻前台服务所需的权限 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -25,6 +28,7 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
     <application
+        android:name=".LedgerApplication"
         android:allowBackup="true"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -47,11 +51,6 @@
             android:exported="false"
             android:launchMode="singleTop" />
 
-        <activity
-            android:name=".PieActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
-
         <!-- 转账「已被接收」的确认页。从提醒点进来，也可从主界面横幅进 -->
         <activity
             android:name=".TransferActivity"
@@ -59,13 +58,11 @@
             android:exported="false"
             android:launchMode="singleTop" />
 
-        <!-- 微信转账/红包自动记账 · 无障碍服务。
-             在 ColorOS / 新版微信收不到通知的场景下，
-             监听微信界面变化自动记账。 -->
+        <!-- Read completed WeChat receipt pages locally and stage proposals for user review. -->
         <service
             android:name=".WeChatAccessibilityService"
             android:exported="false"
-            android:label="微信转账/红包自动记账"
+            android:label="@string/wechat_reader_service_name"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />

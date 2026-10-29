@@ -82,19 +82,32 @@
             <TextView android:id="@+id/btnMultiSelectAll" style="@style/Ledger.MultiAction" android:text="@string/select_all" />
             <TextView android:id="@+id/btnMultiDelete" style="@style/Ledger.MultiAction" android:text="@string/delete" />
         </LinearLayout>
-        <ListView
-            android:id="@+id/lvBills"
+        <com.lele.ledger.CircularPageLayout
+            android:id="@+id/pageContent"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="12dp"
-            android:clipToPadding="false"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="8dp"
-            android:scrollbars="none" />
-        <LinearLayout
+            android:layout_weight="1">
+            <ListView
+                android:id="@+id/lvBills"
+                android:background="@color/bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="12dp"
+                android:clipToPadding="false"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="8dp"
+                android:scrollbars="none" />
+            <include
+                android:id="@+id/statisticsPanel"
+                layout="@layout/view_statistics"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+        </com.lele.ledger.CircularPageLayout>
+        <com.lele.ledger.AnimatedTabBar
+            android:id="@+id/tabBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -115,7 +128,7 @@
                 android:drawableTop="@drawable/ic_ledger"
                 android:drawableTint="@color/accent"
                 android:drawablePadding="3dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/bg_nav_tab"
                 android:clickable="true"
                 android:focusable="true" />
             <TextView
@@ -130,7 +143,7 @@
                 android:drawableTop="@drawable/ic_chart"
                 android:drawableTint="@color/text_secondary"
                 android:drawablePadding="3dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:background="@drawable/bg_nav_tab"
                 android:clickable="true"
                 android:focusable="true" />
             <TextView
@@ -150,7 +163,7 @@
                 android:textColor="@color/button_text"
                 android:clickable="true"
                 android:focusable="true" />
-        </LinearLayout>
+        </com.lele.ledger.AnimatedTabBar>
     </LinearLayout>
     <TextView
         android:id="@+id/saveFeedback"
@@ -225,6 +238,11 @@
                     style="@style/Ledger.SettingsAction"
                     android:text="@string/open_listener"
                     android:drawableStart="@drawable/ic_bell" />
+                <TextView
+                    android:id="@+id/btnWechatReader"
+                    style="@style/Ledger.SettingsAction"
+                    android:text="@string/wechat_reader_disabled"
+                    android:drawableStart="@drawable/ic_wallet" />
                 <TextView
                     android:id="@+id/btnBattery"
                     style="@style/Ledger.SettingsAction"
